@@ -41,6 +41,7 @@ export default function Navbar() {
       ]
     : [
         { name: "Workspace", path: "/" },
+        { name: "Clone", path: "/clone" },
         { name: "Gallery", path: "/gallery" },
         { name: "Pricing", path: "/pricing" },
       ];

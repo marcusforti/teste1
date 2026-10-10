@@ -25,6 +25,31 @@ const config = {
     generationCost: 10,
     model: "gpt-4o",
   },
+  // Clone Studio: photos -> portrait -> (voice clone) -> script TTS -> talking video.
+  clone: {
+    endpoints: {
+      portrait: "nano-banana-edit",
+      scene: "nano-banana-edit",
+      voiceClone: "minimax-voice-clone",
+      tts: "minimax-speech-2.6-hd",
+      talk: "infinitetalk-image-to-video",
+    },
+    // App credits per step (ignored when the user brings their own MuAPI key).
+    costs: { portrait: 20, scene: 20, voiceClone: 100, tts: 10, talk: 300 },
+    maxPhotos: 6,
+    maxScriptChars: 1500,
+    presetVoices: [
+      "Friendly_Person",
+      "Casual_Guy",
+      "Lively_Girl",
+      "Calm_Woman",
+      "Deep_Voice_Man",
+      "Inspirational_girl",
+      "Patient_Man",
+      "Wise_Woman",
+    ],
+    emotions: ["happy", "neutral", "surprised", "sad", "angry", "fearful", "disgusted"],
+  },
 };
 
 export default config;

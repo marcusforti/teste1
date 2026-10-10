@@ -1,3 +1,36 @@
+# Estúdio de Clone + UGC com IA
+
+Suas fotos e sua voz viram vídeos falando, sem precisar se gravar toda vez. É uma versão em app do que
+a AvatarHype ensina em curso (análise completa em [docs/engenharia-reversa-avatarhype.md](docs/engenharia-reversa-avatarhype.md)).
+
+**Fluxo em `/clone`:**
+1. **Fotos → retrato base** (`nano-banana-edit`): de 1 a 6 fotos geram um retrato 9:16 fiel à sua identidade.
+2. **Voz (opcional)** (`minimax-voice-clone`): amostra de áudio + consentimento explícito → sua voz clonada.
+3. **Roteiro → vídeo**: cena opcional (`nano-banana-edit`) → fala com sua voz ou uma voz pronta
+   (`minimax-speech-2.6-hd`) → foto falando (`infinitetalk-image-to-video`). As etapas encadeiam
+   sozinhas, por webhook ou por polling.
+
+Os agentes de roteiro (estrategista, roteirista, diretor de cenas) estão em [`prompts/`](prompts/).
+
+### Rodar localmente
+
+```bash
+cp .env.example .env    # DATABASE_URL, NEXTAUTH_SECRET, UGC_API_KEY (MuAPI)…
+npm install
+npx prisma db push
+npm run dev             # http://localhost:3000/clone
+```
+
+Sem `WEBHOOK_URL` público, a página `/clone` consulta o status dos jobs a cada 8 s
+(`POST /api/jobs/[requestId]/refresh`). Você também pode entrar só com a sua chave MuAPI; nesse caso
+os créditos internos não são cobrados.
+
+Custos internos por etapa: `src/lib/config.js` → `clone.costs`.
+
+---
+
+*Baseado no [Open-AI-UGC](https://github.com/Anil-matcha/Open-AI-UGC) (MIT). README original abaixo.*
+
 # Open AI UGC — Free Open-Source Alternative to Arcads & MakeUGC
 
 [![Powered by MuAPI](https://img.shields.io/badge/Powered%20by-MuAPI-6366f1?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0tMSAxNHYtNGgtMnYtMmg0djZoLTJ6bTAtOFY2aDJ2MmgtMnoiLz48L3N2Zz4=)](https://muapi.ai?utm_source=github&utm_medium=badge&utm_campaign=open-ai-ugc)

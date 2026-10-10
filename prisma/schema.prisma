@@ -44,6 +44,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   creations     Creation[]
+  clones        Clone[]
 }
 
 model Creation {
@@ -66,8 +67,38 @@ model Creation {
   duration     Int?
   mode         String?
   inputImages  String?  @db.Text
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Clone Studio: multi-step jobs (scene -> tts -> talk). JSON, see src/lib/clone-pipeline.js
+  kind         String?  // "ugc" (default) | "clone-video"
+  cloneId      String?
+  pipeline     String?  @db.Text
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clone Clone? @relation(fields: [cloneId], references: [id], onDelete: SetNull)
+}
+
+// A person's digital clone: reference photos -> base portrait (+ optional cloned voice).
+model Clone {
+  id                String    @id @default(cuid())
+  userId            String
+  name              String
+  photos            String    @db.Text // JSON array of uploaded photo URLs
+  createdAt         DateTime  @default(now())
+
+  portraitUrl       String?   @db.Text
+  portraitStatus    String    @default("processing")
+  portraitRequestId String?   @unique
+  portraitError     String?   @db.Text
+
+  voiceId           String?   // MiniMax custom_voice_id once cloned
+  voiceSampleUrl    String?   @db.Text
+  voiceStatus       String    @default("none") // none | processing | ready | failed
+  voiceRequestId    String?   @unique
+  voiceError        String?   @db.Text
+  voiceConsentAt    DateTime?
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creations Creation[]
 }
 
 model VerificationToken {

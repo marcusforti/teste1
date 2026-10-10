@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { applyJobUpdate } from "@/lib/clone-pipeline";
 
 export async function POST(req) {
   try {
@@ -13,44 +13,10 @@ export async function POST(req) {
       return NextResponse.json({ error: "Missing request id" }, { status: 400 });
     }
 
-    const creation = await prisma.creation.findUnique({
-      where: { requestId }
-    });
-
-    if (!creation) {
-      console.warn(`[MUAPI_WEBHOOK] Creation with requestId ${requestId} not found.`);
+    const handled = await applyJobUpdate(data);
+    if (!handled) {
+      console.warn(`[MUAPI_WEBHOOK] No creation or clone with requestId ${requestId}.`);
       return NextResponse.json({ error: "Creation not found" }, { status: 404 });
-    }
-
-    if (data.status === "failed" || (data.error && data.error !== "")) {
-      await prisma.creation.update({
-        where: { id: creation.id },
-        data: {
-          status: "failed",
-          error: data.error || "Generation failed"
-        }
-      });
-      console.log(`[MUAPI_WEBHOOK] Marked creation ${creation.id} as failed.`);
-    } else if (data.status === "completed" || data.outputs) {
-      const outputs = data.outputs || [];
-      const videoUrl = outputs.length > 0 ? outputs[0] : null;
-
-      await prisma.creation.update({
-        where: { id: creation.id },
-        data: {
-          status: "completed",
-          url: videoUrl
-        }
-      });
-      console.log(`[MUAPI_WEBHOOK] Marked creation ${creation.id} as completed.`);
-    } else {
-      // Could be 'processing' or 'pending'
-      await prisma.creation.update({
-        where: { id: creation.id },
-        data: {
-          status: data.status || "processing"
-        }
-      });
     }
 
     return NextResponse.json({ success: true });

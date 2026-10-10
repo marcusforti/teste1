@@ -17,7 +17,7 @@ export async function POST(req) {
       return new NextResponse("No file provided", { status: 400 });
     }
 
-    const apiKey = process.env.UGC_API_KEY;
+    const apiKey = session.user.customApiKey?.trim() || process.env.UGC_API_KEY;
     if (!apiKey) {
       return new NextResponse("API Key not configured", { status: 500 });
     }
