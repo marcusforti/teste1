@@ -1,0 +1,110 @@
+generator client {
+  provider      = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  credits       Int       @default(10)
+  customApiKey  String?   @db.Text
+  accounts      Account[]
+  sessions      Session[]
+  creations     Creation[]
+  clones        Clone[]
+}
+
+model Creation {
+  id           String   @id @default(cuid())
+  type         String?  // video or image
+  title        String?
+  prompt       String?  @db.Text
+  url          String?  @db.Text
+  createdAt    DateTime @default(now())
+  userId       String
+  
+  requestId    String?  @unique
+  status       String   @default("processing")
+  error        String?  @db.Text
+
+  // Generation parameters
+  modelId      String?
+  aspectRatio  String?
+  resolution   String?
+  duration     Int?
+  mode         String?
+  inputImages  String?  @db.Text
+
+  // Clone Studio: multi-step jobs (scene -> tts -> talk). JSON, see src/lib/clone-pipeline.js
+  kind         String?  // "ugc" (default) | "clone-video"
+  cloneId      String?
+  pipeline     String?  @db.Text
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clone Clone? @relation(fields: [cloneId], references: [id], onDelete: SetNull)
+}
+
+// A person's digital clone: reference photos -> base portrait (+ optional cloned voice).
+model Clone {
+  id                String    @id @default(cuid())
+  userId            String
+  name              String
+  photos            String    @db.Text // JSON array of uploaded photo URLs
+  createdAt         DateTime  @default(now())
+
+  portraitUrl       String?   @db.Text
+  portraitStatus    String    @default("processing")
+  portraitRequestId String?   @unique
+  portraitError     String?   @db.Text
+
+  voiceId           String?   // MiniMax custom_voice_id once cloned
+  voiceSampleUrl    String?   @db.Text
+  voiceStatus       String    @default("none") // none | processing | ready | failed
+  voiceRequestId    String?   @unique
+  voiceError        String?   @db.Text
+  voiceConsentAt    DateTime?
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creations Creation[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
