@@ -1,0 +1,282 @@
+{
+ "total": 20.0,
+ "segments": [
+  {
+   "id": "s1",
+   "start": 0.6,
+   "dur": 4.096,
+   "text": "Este é o Macacão Max. Ele ama explorar, brincar e descobrir o mundo.",
+   "words": [
+    {
+     "start": 0.6,
+     "end": 0.82,
+     "word": "Este"
+    },
+    {
+     "start": 0.82,
+     "end": 0.96,
+     "word": "é"
+    },
+    {
+     "start": 0.96,
+     "end": 1.0,
+     "word": "o"
+    },
+    {
+     "start": 1.0,
+     "end": 1.44,
+     "word": "Macacão"
+    },
+    {
+     "start": 1.44,
+     "end": 1.72,
+     "word": "Max."
+    },
+    {
+     "start": 2.18,
+     "end": 2.32,
+     "word": "Ele"
+    },
+    {
+     "start": 2.32,
+     "end": 2.48,
+     "word": "ama"
+    },
+    {
+     "start": 2.48,
+     "end": 3.02,
+     "word": "explorar,"
+    },
+    {
+     "start": 3.08,
+     "end": 3.54,
+     "word": "brincar"
+    },
+    {
+     "start": 3.54,
+     "end": 3.66,
+     "word": "e"
+    },
+    {
+     "start": 3.66,
+     "end": 4.04,
+     "word": "descobrir"
+    },
+    {
+     "start": 4.04,
+     "end": 4.24,
+     "word": "o"
+    },
+    {
+     "start": 4.24,
+     "end": 4.46,
+     "word": "mundo."
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "start": 5.246,
+   "dur": 4.224,
+   "text": "Quando algo não sai como ele queria, Max aprende a ficar com o sentimento.",
+   "words": [
+    {
+     "start": 5.25,
+     "end": 5.41,
+     "word": "Quando"
+    },
+    {
+     "start": 5.41,
+     "end": 5.69,
+     "word": "algo"
+    },
+    {
+     "start": 5.69,
+     "end": 5.85,
+     "word": "não"
+    },
+    {
+     "start": 5.85,
+     "end": 6.15,
+     "word": "sai"
+    },
+    {
+     "start": 6.15,
+     "end": 6.37,
+     "word": "como"
+    },
+    {
+     "start": 6.37,
+     "end": 6.51,
+     "word": "ele"
+    },
+    {
+     "start": 6.51,
+     "end": 6.89,
+     "word": "queria,"
+    },
+    {
+     "start": 7.15,
+     "end": 7.45,
+     "word": "Max"
+    },
+    {
+     "start": 7.45,
+     "end": 8.01,
+     "word": "aprende"
+    },
+    {
+     "start": 8.01,
+     "end": 8.05,
+     "word": "a"
+    },
+    {
+     "start": 8.05,
+     "end": 8.29,
+     "word": "ficar"
+    },
+    {
+     "start": 8.29,
+     "end": 8.61,
+     "word": "com"
+    },
+    {
+     "start": 8.61,
+     "end": 8.67,
+     "word": "o"
+    },
+    {
+     "start": 8.67,
+     "end": 9.29,
+     "word": "sentimento."
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "start": 10.02,
+   "dur": 3.456,
+   "text": "Então ele respira, se acalma, e dá um passo de cada vez.",
+   "words": [
+    {
+     "start": 10.02,
+     "end": 10.32,
+     "word": "Então"
+    },
+    {
+     "start": 10.32,
+     "end": 10.5,
+     "word": "ele"
+    },
+    {
+     "start": 10.5,
+     "end": 11.02,
+     "word": "respira,"
+    },
+    {
+     "start": 11.1,
+     "end": 11.18,
+     "word": "se"
+    },
+    {
+     "start": 11.18,
+     "end": 11.72,
+     "word": "acalma"
+    },
+    {
+     "start": 11.72,
+     "end": 12.0,
+     "word": "e"
+    },
+    {
+     "start": 12.0,
+     "end": 12.12,
+     "word": "dá"
+    },
+    {
+     "start": 12.12,
+     "end": 12.22,
+     "word": "um"
+    },
+    {
+     "start": 12.22,
+     "end": 12.5,
+     "word": "passo"
+    },
+    {
+     "start": 12.5,
+     "end": 12.66,
+     "word": "de"
+    },
+    {
+     "start": 12.66,
+     "end": 12.86,
+     "word": "cada"
+    },
+    {
+     "start": 12.86,
+     "end": 13.18,
+     "word": "vez."
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "start": 14.026,
+   "dur": 3.307,
+   "text": "E uma pequena pedra azul pode abrir uma grande aventura.",
+   "words": [
+    {
+     "start": 14.03,
+     "end": 14.13,
+     "word": "e"
+    },
+    {
+     "start": 14.13,
+     "end": 14.27,
+     "word": "uma"
+    },
+    {
+     "start": 14.27,
+     "end": 14.71,
+     "word": "pequena"
+    },
+    {
+     "start": 14.71,
+     "end": 15.05,
+     "word": "pedra"
+    },
+    {
+     "start": 15.05,
+     "end": 15.37,
+     "word": "azul,"
+    },
+    {
+     "start": 15.57,
+     "end": 15.77,
+     "word": "pode"
+    },
+    {
+     "start": 15.77,
+     "end": 16.05,
+     "word": "abrir"
+    },
+    {
+     "start": 16.05,
+     "end": 16.27,
+     "word": "uma"
+    },
+    {
+     "start": 16.27,
+     "end": 16.57,
+     "word": "grande"
+    },
+    {
+     "start": 16.57,
+     "end": 17.17,
+     "word": "aventura."
+    }
+   ]
+  }
+ ]
+}

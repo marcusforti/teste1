@@ -26,3 +26,6 @@ edits/*/build/render.log
 edits/*/build/cache/
 edits/*/assets/master.wav
 !edits/rock-os-3d/rock-os-3d.mp4
+!edits/max-floresta/macacao-max.mp4
+edits/*/build/vo/
+edits/*/build/mix_raw.wav
