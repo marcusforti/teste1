@@ -24,10 +24,11 @@
 
   // ---------- utilidades ----------
   function imgTex(id) {
-    const tex = new THREE.Texture(document.getElementById(id));
-    tex.encoding = THREE.sRGBEncoding;
-    tex.anisotropy = 4;
-    lazyTex.push(tex);
+    const img = document.getElementById(id);
+    const w = Math.min(2048, img.naturalWidth || 1024), h = Math.round(w * ((img.naturalHeight || 1024) / (img.naturalWidth || 1024)));
+    const tex = canvasTex(w, h, (ctx, cw, ch) => { if (img.complete && img.naturalWidth) ctx.drawImage(img, 0, 0, cw, ch); });
+    const e = canvases[canvases.length - 1];
+    e.img = img;
     return tex;
   }
   function pumpTextures() {
@@ -46,7 +47,7 @@
     const ctx = e.c.getContext("2d"); ctx.clearRect(0, 0, e.c.width, e.c.height); e.draw(ctx, e.c.width, e.c.height); e.tex.needsUpdate = true;
     e.fontsOk = document.fonts ? document.fonts.check('900 40px "Big Shoulders Display"') && document.fonts.check('600 20px "JetBrains Mono"') : true;
   }
-  function pumpCanvases() { for (const e of canvases) if (!e.fontsOk) redraw(e); }
+  function pumpCanvases() { for (const e of canvases) if (!e.fontsOk || (e.img && !e.imgOk)) { redraw(e); if (e.img) e.imgOk = e.img.complete && e.img.naturalWidth > 0; } }
   function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
 
   function label(text, opts = {}) {
@@ -117,7 +118,7 @@
         new THREE.MeshStandardMaterial({ color: 0x2a0a08, metalness: 0.85, roughness: 0.35 }),
       ]);
     };
-    const a = mk("ROCK", 0xd9d2cb, 0x000000, 0), b = mk("OS", RED, 0x8a0800, 0.9);
+    const a = mk("ROCK", 0xb8b0a8, 0x000000, 0), b = mk("OS", 0xd8261c, 0x6a0600, 0.55);
     const wa = a.geometry.boundingBox.max.x;
     b.position.x = wa + 0.55;
     const W = b.position.x + b.geometry.boundingBox.max.x;
@@ -129,7 +130,7 @@
   }
   function addLights(scene, rimColor = RED) {
     scene.add(new THREE.AmbientLight(0x2a1414, 1.2));
-    const key = new THREE.DirectionalLight(0xfff4ea, 1.7); key.position.set(-4, 6, 9); scene.add(key);
+    const key = new THREE.DirectionalLight(0xfff4ea, 1.25); key.position.set(-4, 6, 9); scene.add(key);
     const rim = new THREE.PointLight(rimColor, 70, 30); rim.position.set(5, 2, -3); scene.add(rim);
     const fill = new THREE.PointLight(0xff6a40, 25, 25); fill.position.set(-6, -2, 4); scene.add(fill);
     return { key, rim, fill };
@@ -271,7 +272,7 @@
         logo.position.set(0, 0.35, lerp(9, 0, slam) + exitP * 9);
         logo.rotation.set(Math.sin(lt * 0.7) * 0.05, Math.sin(lt * 0.55) * 0.22, 0);
         logo.scale.setScalar(1 + lt * 0.012);
-        logo.userData.os.material[0].emissiveIntensity = 0.9 + Math.sin(lt * 3) * 0.15;
+        logo.userData.os.material[0].emissiveIntensity = 0.55 + Math.sin(lt * 3) * 0.1;
         rings.forEach((r, i) => { const p = expoOut(prog(lt, 0.05 + i * 0.08, 1.2)); r.scale.setScalar(0.2 + p * 0.8 + exitP); r.material.opacity = 0.9 * p * (1 - exitP); });
         const sp = prog(lt, 0, 0.9); shock.scale.setScalar(0.5 + easeOut3(sp) * 7); shock.material.opacity = (1 - sp) * 0.9;
         burgers.forEach((b, i) => {
@@ -391,11 +392,11 @@
         w.em.userData.update(t);
         // câmera: plano aéreo descendo e orbitando
         const a = lt / (this.t1 - this.t0);
-        const ang = lerp(-0.35, 0.25, easeInOut(a));
-        const dist = lerp(30, 21, easeOut3(a));
-        const hgt = lerp(20, 11, easeOut3(a));
+        const ang = lerp(-0.35, 0.22, easeInOut(a));
+        const dist = lerp(34, 26, easeOut3(a));
+        const hgt = lerp(22, 14, easeOut3(a));
         cam.position.set(Math.sin(ang) * dist, hgt, Math.cos(ang) * dist);
-        cam.lookAt(0.5, 2.2, -0.5);
+        cam.lookAt(0.5, 4.2, -1);
       },
     };
   }
@@ -436,11 +437,11 @@
           });
         });
         const sp = prog(t, tLiga + 0.1, 1.1);
-        w.ituShock.visible = sp > 0 && sp < 1; w.ituShock.scale.setScalar(0.5 + easeOut3(sp) * 6); w.ituShock.material.opacity = (1 - sp);
+        w.ituShock.visible = sp > 0 && sp < 1; w.ituShock.scale.setScalar(0.5 + easeOut3(sp) * 4); w.ituShock.material.opacity = (1 - sp) * 0.7;
         w.em.userData.update(t);
         const a = lt / (this.t1 - this.t0);
-        const target = new THREE.Vector3(lerp(4, 9.5, easeInOut(a)), 2.4, lerp(0, -2.5, easeInOut(a)));
-        cam.position.set(lerp(-6, 4, easeInOut(a)), lerp(12, 7.5, easeOut3(a)), lerp(20, 13, easeOut3(a)));
+        const target = new THREE.Vector3(lerp(5.5, 9, easeInOut(a)), 2.6, lerp(-0.5, -2.5, easeInOut(a)));
+        cam.position.set(lerp(3, 9, easeInOut(a)), lerp(16, 11, easeOut3(a)), lerp(24, 17, easeOut3(a)));
         cam.lookAt(target);
       },
     };
@@ -552,7 +553,7 @@
         let pulse = 0; (CUES.beep || []).concat(CUES.online || []).forEach((b) => { const d = t - b; if (d > 0 && d < 0.5) pulse = Math.max(pulse, 1 - d / 0.5); });
         bolt.material.color.setScalar(1).setHex(RED).multiplyScalar(1 + pulse * 2.5);
         L.rim.intensity = 70 + pulse * 220;
-        logo.userData.os.material[0].emissiveIntensity = 0.9 + pulse * 2;
+        logo.userData.os.material[0].emissiveIntensity = 0.55 + pulse * 1.4;
         em.userData.update(t);
         const k = t - this.t0;
         cam.position.set(Math.sin(k * 0.2) * 0.8, 0.5, 13 + Math.max(0, -lt) * 0.0);
@@ -572,7 +573,7 @@
     comp = new THREE.EffectComposer(R);
     renderPass = new THREE.RenderPass(dummyScene, dummyCam); renderPass.clearAlpha = 0;
     comp.addPass(renderPass);
-    bloom = new THREE.UnrealBloomPass(new THREE.Vector2(W_ / 2, H_ / 2), 0.85, 0.5, 0.72);
+    bloom = new THREE.UnrealBloomPass(new THREE.Vector2(W_ / 2, H_ / 2), 0.62, 0.45, 0.86);
     comp.addPass(bloom);
     const city = cityWorld();
     envs.push(envHook(), envProblem(), envReveal(), envRede(city), envWall(), envItu(city), envFinal());

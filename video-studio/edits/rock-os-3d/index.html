@@ -128,8 +128,8 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink)}
 .ubtn{font-weight:700;font-size:22px;border-radius:10px;padding:10px 22px;background:var(--red);color:#fff}
 .ubtn.g{background:transparent;border:1.5px solid var(--line);color:var(--fg)}
 .tap{position:absolute;width:90px;height:90px;border-radius:50%;border:5px solid #fff;box-shadow:0 0 30px rgba(255,255,255,.6);opacity:0;z-index:8}
-#t-burst{position:absolute;left:330px;top:300px;width:820px;z-index:7;filter:drop-shadow(0 50px 60px rgba(0,0,0,.75))}
-#t-burst-glow{position:absolute;left:280px;top:200px;width:900px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(255,59,48,.55),transparent 65%);z-index:6}
+#t-burst{position:absolute;left:150px;top:330px;width:700px;z-index:7;filter:drop-shadow(0 50px 60px rgba(0,0,0,.75))}
+#t-burst-glow{position:absolute;left:60px;top:220px;width:900px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(255,59,48,.55),transparent 65%);z-index:6}
 #t-right{left:980px;top:150px;width:860px;z-index:5}
 #t-right .disp{font-size:116px;text-shadow:0 10px 40px #000}
 #t-right .big{font-size:160px}
@@ -161,13 +161,14 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink)}
 .toast b{display:block;font-family:var(--display);font-size:32px;text-transform:uppercase;line-height:1}
 .toast .ex{font-family:var(--mono);font-size:15px;color:var(--muted);margin-top:4px}
 .toast .go{display:inline-block;margin-top:10px;font-weight:700;font-size:19px;background:var(--red);color:#fff;border-radius:9px;padding:7px 14px}
+#q-dim{position:absolute;inset:0;background:#0c0a0a;opacity:0;z-index:5;pointer-events:none}
 #s-big{position:absolute;left:0;right:0;top:400px;text-align:center;font-size:230px;z-index:6;text-shadow:0 20px 60px #000}
 /* S10 */
 #a-head{left:110px;top:90px;z-index:3}
 #a-head .h2{font-size:104px;margin-top:14px;position:relative;height:100px}
 #a-head .h2 div{position:absolute;left:0;top:0;white-space:nowrap}
-#a-ring{position:absolute;left:760px;top:320px;width:400px;height:520px;transform-style:preserve-3d}
-.agent{position:absolute;left:0;top:0;width:400px;height:520px;padding:26px;display:flex;flex-direction:column;gap:14px;backface-visibility:hidden}
+#a-ring{position:absolute;left:700px;top:300px;width:520px;height:600px;transform-style:preserve-3d}
+.agent{position:absolute;left:0;top:0;width:520px;height:600px;padding:26px;display:flex;flex-direction:column;gap:14px;backface-visibility:hidden}
 .agent h3{font-family:var(--display);font-weight:900;font-size:52px;text-transform:uppercase;line-height:.92}
 .agent p{font-size:23px;color:var(--muted);line-height:1.35}
 .agent .says{margin-top:auto;font-family:var(--mono);font-size:19px;line-height:1.45;background:var(--surface2);border-radius:10px;padding:14px;min-height:150px;border-left:4px solid var(--red)}
@@ -402,6 +403,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink)}
           <div class="face back"><div class="l">Desperdício hoje</div><div class="n">3,2 kg</div><div class="l" style="color:var(--muted)">em quilos e em reais</div></div>
         </div>
       </div>
+      <div id="q-dim"></div>
       <div id="s-big" class="disp hide">Tudo vira <span class="red">dado.</span></div>
     </div>
 
@@ -760,7 +762,7 @@ counter($("#q4kg"), 0, 3.2, qAt[3], 1.2, (v) => v.toFixed(1).replace(".", ",") +
 const tTudo = W("salao", "tudo");
 tiles.forEach((q, i) => tl.to(q, { rotationY: 180, duration: 0.7, ease: "power3.inOut" }, tTudo - 0.25 + i * 0.08));
 slam("#s-big", W("salao", "dado") - 0.05, 1.4);
-tl.to(tiles, { opacity: 0.35, duration: 0.3 }, W("salao", "dado"));
+tl.to("#q-dim", { opacity: 0.6, duration: 0.3 }, W("salao", "dado"));
 shake("#world", W("salao", "dado"), 10, 6);
 
 // =====================================================================
@@ -770,9 +772,9 @@ const t11 = S("dono");
 scene("s10", t10 - 0.3, t11 - 0.2);
 rise("#a-head", t10 - 0.2);
 const agents = $$(".agent");
-agents.forEach((a, i) => gsap.set(a, { rotationY: i * 90, z: 520, transformOrigin: "50% 50% -520px" }));
+agents.forEach((a, i) => gsap.set(a, { rotationY: i * 90, z: 300, transformOrigin: "50% 50% -300px" }));
 gsap.set("#a-ring", { transformPerspective: 2400 });
-tl.fromTo("#a-ring", { autoAlpha: 0, rotationY: 120, z: -800 }, { autoAlpha: 1, rotationY: 0, z: -520, duration: 1.0, ease: "expo.out" }, W("agentes", "agentes") - 0.1);
+tl.fromTo("#a-ring", { autoAlpha: 0, rotationY: 120, z: -800 }, { autoAlpha: 1, rotationY: 0, z: -300, duration: 1.0, ease: "expo.out" }, W("agentes", "agentes") - 0.1);
 const tTime = W("agentes", "time");
 tl.to("#a-t1", { autoAlpha: 0, y: -40, duration: 0.25 }, tTime - 0.3);
 slam("#a-t2", tTime - 0.15, 1.2);
