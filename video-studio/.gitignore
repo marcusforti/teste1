@@ -23,3 +23,6 @@ edits/rock-os/snapshots/
 edits/*/work-*/
 edits/*/.*hf-transaction*/
 edits/*/build/render.log
+edits/*/build/cache/
+edits/*/assets/master.wav
+!edits/rock-os-3d/rock-os-3d.mp4
