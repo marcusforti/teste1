@@ -8,6 +8,8 @@ import config from "@/lib/config";
 
 const { presetVoices, emotions, maxPhotos, maxScriptChars, costs } = config.clone;
 const POLL_MS = 8000;
+// MuAPI reports pending/queued/starting/processing while a job runs.
+const isActive = (status) => status !== "completed" && status !== "failed";
 
 async function uploadFile(file) {
   const formData = new FormData();
@@ -261,7 +263,7 @@ function VideoPanel({ clone, onChanged }) {
 }
 
 function stepLabel(creation) {
-  if (creation.status !== "processing" || !creation.pipeline) return null;
+  if (!isActive(creation.status) || !creation.pipeline) return null;
   try {
     const p = JSON.parse(creation.pipeline);
     const names = { scene: "gerando cena", tts: "gerando voz", talk: "animando" };
@@ -297,7 +299,7 @@ export default function ClonePage() {
     const pending = clones.flatMap((c) => [
       c.portraitStatus === "processing" && c.portraitRequestId,
       c.voiceStatus === "processing" && c.voiceRequestId,
-      ...c.creations.filter((k) => k.status === "processing" && !k.requestId.endsWith(":advancing")).map((k) => k.requestId),
+      ...c.creations.filter((k) => isActive(k.status) && !k.requestId.endsWith(":advancing")).map((k) => k.requestId),
     ]).filter(Boolean);
     if (pending.length === 0) return;
 
