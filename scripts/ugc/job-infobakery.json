@@ -1,0 +1,22 @@
+{
+  "refs": [
+    "https://cdn.muapi.ai/outputs/generated/7379e709-67a2-4658-92a1-2a6dc0117037_d3949d04.png",
+    "https://cdn.muapi.ai/outputs/generated/dd247b82caf0448f8c9ea15c3b7a2d40.jpg",
+    "https://cdn.muapi.ai/outputs/generated/fa4e5b9e0b0e4b0f85d026e22a871be7.jpg",
+    "https://cdn.muapi.ai/outputs/generated/b9938439343745bbaf7424febf271482.jpg"
+  ],
+  "voice_id": "v0c55c6608342a1",
+  "speed": 1.5,
+  "emotion": "happy",
+  "base_prompt": "Photorealistic vertical 9:16 frame from a UGC smartphone selfie video. The exact same bald bearded man from the reference photos (identical face, beard, skin tone, eyebrows) is filming himself: he holds the smartphone with one arm extended toward the camera, the camera IS his phone's front camera, slight wide-angle selfie perspective, his shoulder and part of the extending arm visible at the frame edge. He wears a bright red casual zip jacket over a dark t-shirt. He looks straight into the camera with his mouth closed and a friendly relaxed expression. Bright cozy home kitchen, natural daylight from a window, realistic everyday look, no text, no watermark, no other people. Scene: ",
+  "scenes": {
+    "s1": "his free hand holds a mixing bowl with chocolate cake batter and a whisk, flour, eggs and a bag of sugar on the counter behind him.",
+    "s2": "standing at the kitchen counter next to a round cake pan filled with batter, measuring cup and ingredients spread out, a little flour on his jacket sleeve.",
+    "s3": "his free hand proudly holds a plate with a freshly baked chocolate cake with a slice cut out, satisfied smile with lips closed."
+  },
+  "lines": {
+    "s1": "Você vende bolo e não sabe quanto sobra de verdade? Cuidado: vender muito não é o mesmo que ganhar.",
+    "s2": "Com o Infobakery você cadastra a receita, os ingredientes pelo preço da embalagem, e ele calcula o custo por fatia e o preço certo.",
+    "s3": "Mudou o preço do leite? Ele recalcula tudo sozinho. Por menos de quinze reais por mês. Entra em infobakery ponto com ponto br."
+  }
+}
