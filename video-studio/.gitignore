@@ -1,0 +1,16 @@
+# Vídeos e áudios brutos ficam fora do git (pesados e privados)
+*.mp4
+*.mov
+*.webm
+*.mp3
+*.wav
+*.m4a
+*_frames/
+node_modules/
+.hyperframes/
+
+# Exceção: o exemplo pronto
+!raw/demo.mp4
+!raw/demo.cut.mp4
+!edits/demo/assets/take.mp4
+!edits/demo/final.mp4
