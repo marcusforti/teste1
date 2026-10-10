@@ -6,8 +6,10 @@ import { FiUpload, FiLoader, FiMic, FiVideo, FiUser, FiPlus, FiAlertCircle, FiTr
 import toast from "react-hot-toast";
 import config from "@/lib/config";
 
-const { presetVoices, emotions, maxPhotos, maxScriptChars, costs } = config.clone;
+const { presetVoices, emotions, speeds, defaultSpeed, maxPhotos, maxScriptChars, costs } = config.clone;
 const POLL_MS = 8000;
+// MuAPI reports pending/queued/starting/processing while a job runs.
+const isActive = (status) => status !== "completed" && status !== "failed";
 
 async function uploadFile(file) {
   const formData = new FormData();
@@ -202,19 +204,35 @@ function VideoPanel({ clone, onChanged }) {
   const [scene, setScene] = useState("");
   const [voice, setVoice] = useState(voiceReady ? "clone" : presetVoices[0]);
   const [emotion, setEmotion] = useState("happy");
+  const [speed, setSpeed] = useState(defaultSpeed);
   const [resolution, setResolution] = useState("480p");
+  const [ownAudioUrl, setOwnAudioUrl] = useState("");
   const [busy, setBusy] = useState(false);
+  const audioRef = useRef(null);
+  const useOwnAudio = voice === "own";
 
   useEffect(() => {
     if (voiceReady) setVoice("clone");
   }, [voiceReady]);
 
-  const cost = (scene.trim() ? costs.scene : 0) + costs.tts + costs.talk;
+  const cost = (scene.trim() ? costs.scene : 0) + (useOwnAudio ? 0 : costs.tts) + costs.talk;
+
+  const uploadOwnAudio = async (file) => {
+    if (!file) return;
+    setBusy(true);
+    try {
+      setOwnAudioUrl(await uploadFile(file));
+    } catch (e) {
+      toast.error(`Falha no upload: ${e.message}`);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const generate = async () => {
     setBusy(true);
     try {
-      await postJson(`/api/clones/${clone.id}/video`, { script, scene, voice, emotion, resolution });
+      await postJson(`/api/clones/${clone.id}/video`, { script, scene, voice, emotion, speed, resolution, audioUrl: useOwnAudio ? ownAudioUrl : undefined });
       toast.success("Gerando vídeo: cena → voz → animação");
       onChanged();
     } catch (e) {
@@ -240,20 +258,34 @@ function VideoPanel({ clone, onChanged }) {
         value={scene}
         onChange={(e) => setScene(e.target.value)}
       />
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
         <select className={inputClass} value={voice} onChange={(e) => setVoice(e.target.value)} aria-label="Voz">
           {voiceReady && <option value="clone">Minha voz clonada</option>}
           {presetVoices.map((v) => <option key={v} value={v}>{v.replace(/_/g, " ")}</option>)}
+          <option value="own">Usar meu áudio (arquivo pronto)</option>
         </select>
         <select className={inputClass} value={emotion} onChange={(e) => setEmotion(e.target.value)} aria-label="Emoção">
           {emotions.map((e) => <option key={e} value={e}>{e}</option>)}
+        </select>
+        <select className={inputClass} value={speed} onChange={(e) => setSpeed(Number(e.target.value))} aria-label="Velocidade da fala">
+          {speeds.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
         <select className={inputClass} value={resolution} onChange={(e) => setResolution(e.target.value)} aria-label="Resolução">
           <option value="480p">480p</option>
           <option value="720p">720p</option>
         </select>
       </div>
-      <button className={buttonClass} disabled={busy || !script.trim()} onClick={generate}>
+      {useOwnAudio && (
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <button className="text-sm border border-divider rounded-lg px-3 py-2 hover:border-primary" onClick={() => audioRef.current?.click()} disabled={busy}>
+            {busy ? <FiLoader className="animate-spin inline" /> : <FiUpload className="inline" />} Enviar áudio gerado no seu PC
+          </button>
+          <input ref={audioRef} type="file" accept="audio/*" hidden onChange={(e) => { uploadOwnAudio(e.target.files?.[0]); e.target.value = ""; }} />
+          {ownAudioUrl && <audio src={ownAudioUrl} controls className="h-8" />}
+          <p className="text-[11px] text-secondary-text w-full">O áudio substitui a etapa de voz: emoção e velocidade são ignoradas, e o roteiro vira só referência.</p>
+        </div>
+      )}
+      <button className={buttonClass} disabled={busy || (useOwnAudio ? !ownAudioUrl : !script.trim())} onClick={generate}>
         {busy ? <FiLoader className="animate-spin" /> : <FiVideo />} Gerar vídeo ({cost} créditos)
       </button>
     </Section>
@@ -261,7 +293,7 @@ function VideoPanel({ clone, onChanged }) {
 }
 
 function stepLabel(creation) {
-  if (creation.status !== "processing" || !creation.pipeline) return null;
+  if (!isActive(creation.status) || !creation.pipeline) return null;
   try {
     const p = JSON.parse(creation.pipeline);
     const names = { scene: "gerando cena", tts: "gerando voz", talk: "animando" };
@@ -297,7 +329,7 @@ export default function ClonePage() {
     const pending = clones.flatMap((c) => [
       c.portraitStatus === "processing" && c.portraitRequestId,
       c.voiceStatus === "processing" && c.voiceRequestId,
-      ...c.creations.filter((k) => k.status === "processing" && !k.requestId.endsWith(":advancing")).map((k) => k.requestId),
+      ...c.creations.filter((k) => isActive(k.status) && !k.requestId.endsWith(":advancing")).map((k) => k.requestId),
     ]).filter(Boolean);
     if (pending.length === 0) return;
 

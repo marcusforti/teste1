@@ -50,6 +50,8 @@ export async function POST(req, { params }) {
         audio_url: body.sampleUrl,
         custom_voice_id: voiceId,
         model: "speech-2.6-hd",
+        // Required by MuAPI: text spoken in the preview generated right after cloning.
+        prompt: "Olá! Esta é uma prévia da minha voz clonada.",
         need_noise_reduction: true,
         need_volume_normalization: true,
       },

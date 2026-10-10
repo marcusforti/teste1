@@ -20,10 +20,11 @@ function scenePrompt(scene) {
 }
 
 // pipeline JSON stored on Creation.pipeline:
-// { steps: ["scene"?, "tts", "talk"], index, portraitUrl, scene?, script, voiceId, emotion, language, resolution,
+// { steps: ["scene"?, "tts"?, "talk"], index, portraitUrl, scene?, script, voiceId, emotion, speed, language, resolution,
 //   imageUrl?, audioUrl? }
-export function buildPipeline({ portraitUrl, scene, script, voiceId, emotion, language, resolution }) {
-  const steps = scene ? ["scene", "tts", "talk"] : ["tts", "talk"];
+// When audioUrl is given (speech produced elsewhere, e.g. a local voice-clone model), the tts step is skipped.
+export function buildPipeline({ portraitUrl, scene, script, voiceId, emotion, speed, language, resolution, audioUrl }) {
+  const steps = [...(scene ? ["scene"] : []), ...(audioUrl ? [] : ["tts"]), "talk"];
   return {
     steps,
     index: 0,
@@ -32,10 +33,11 @@ export function buildPipeline({ portraitUrl, scene, script, voiceId, emotion, la
     script,
     voiceId,
     emotion,
+    speed,
     language,
     resolution,
     imageUrl: scene ? null : portraitUrl,
-    audioUrl: null,
+    audioUrl: audioUrl || null,
   };
 }
 
@@ -59,6 +61,7 @@ export async function startStep(pipeline, apiKey) {
           prompt: pipeline.script,
           voice_id: pipeline.voiceId,
           emotion: pipeline.emotion,
+          speed: pipeline.speed ?? 1,
           language_boost: pipeline.language,
           format: "mp3",
           sample_rate: 44100,
