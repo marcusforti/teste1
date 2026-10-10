@@ -33,11 +33,11 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink)}
 #bg-grid{position:absolute;inset:-80px;opacity:.07;
   background-image:linear-gradient(var(--muted) 1px,transparent 1px),linear-gradient(90deg,var(--muted) 1px,transparent 1px);
   background-size:80px 80px}
-#grain{position:absolute;left:-200px;top:-200px;width:2320px;height:1480px;opacity:.10;mix-blend-mode:overlay;pointer-events:none}
+#grain{position:absolute;left:-256px;top:-256px;width:2432px;height:1592px;opacity:.35;background:url(assets/grain.png) repeat;pointer-events:none}
 #vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,0,0,.65) 100%)}
 #scan{position:absolute;inset:0;pointer-events:none;opacity:.06;background:repeating-linear-gradient(0deg,#000 0 2px,transparent 2px 4px)}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
-#redflash{position:absolute;inset:0;background:var(--red);opacity:0;mix-blend-mode:screen;pointer-events:none}
+#redflash{position:absolute;inset:0;background:var(--red);opacity:0;pointer-events:none}
 #fadeout{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
 
 /* HUD global */
@@ -276,8 +276,8 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink)}
       <svg id="r-rings" viewBox="0 0 200 200"><g fill="none" stroke="#3a2c2a" stroke-width=".8">
         <circle class="ring" cx="100" cy="100" r="92"/><circle class="ring" cx="100" cy="100" r="70"/><circle class="ring" cx="100" cy="100" r="48"/></g></svg>
       <div id="r-logo" class="disp">Rock <span class="red">OS</span></div>
-      <svg id="r-bolt" viewBox="0 0 200 26" preserveAspectRatio="none">
-        <polyline id="bolt2" points="0,13 46,13 56,4 70,24 84,1 98,22 110,13 200,13" pathLength="1" fill="none" stroke="#ff3b30" stroke-width="2.2" stroke-linejoin="round" stroke-dasharray="1" stroke-dashoffset="1" vector-effect="non-scaling-stroke" style="filter:drop-shadow(0 0 10px rgba(255,59,48,.9))"/>
+      <svg id="r-bolt" viewBox="-6 -6 1112 152" style="overflow:visible">
+        <polyline id="bolt2" points="0,70 253,70 308,22 385,129 462,5 539,118 605,70 1100,70" pathLength="1" fill="none" stroke="#ff3b30" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="1" stroke-dashoffset="1" style="filter:drop-shadow(0 0 10px rgba(255,59,48,.9))"/>
       </svg>
       <div id="r-tag1" class="disp hide">Um cérebro só</div>
       <div id="r-tag2" class="disp hide">para as três lojas <span class="red">mais monstras</span> da região</div>
@@ -541,8 +541,8 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink)}
       <div id="e-logo" class="hide">
         <svg id="e-rings" viewBox="0 0 200 200"><g fill="none" stroke="#3a2c2a" stroke-width=".8"><circle class="ering" cx="100" cy="100" r="92"/><circle class="ering" cx="100" cy="100" r="70"/><circle class="ering" cx="100" cy="100" r="48"/></g></svg>
         <div id="e-name" class="disp">Rock <span class="red">OS</span></div>
-        <svg id="e-bolt" viewBox="0 0 200 26" preserveAspectRatio="none">
-          <polyline id="bolt3" points="0,13 46,13 56,4 70,24 84,1 98,22 110,13 200,13" pathLength="1" fill="none" stroke="#ff3b30" stroke-width="2.4" stroke-linejoin="round" stroke-dasharray="1" stroke-dashoffset="1" vector-effect="non-scaling-stroke" style="filter:drop-shadow(0 0 12px rgba(255,59,48,.95))"/>
+        <svg id="e-bolt" viewBox="-6 -6 1212 162" style="overflow:visible">
+          <polyline id="bolt3" points="0,75 276,75 336,23 420,138 504,6 588,127 660,75 1200,75" pathLength="1" fill="none" stroke="#ff3b30" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="1" stroke-dashoffset="1" style="filter:drop-shadow(0 0 12px rgba(255,59,48,.95))"/>
         </svg>
         <div id="e-sub">THE ROCK BURGERS</div>
         <div id="e-sub2">WANEL VILLE · BOA VISTA · ITU — PROPOSTA DE VISÃO</div>
@@ -554,7 +554,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink)}
   <!-- camadas globais -->
   <div id="hud"><div class="l"><b>ROCK <i>OS</i></b> · THE ROCK BURGERS</div><div class="r"><span id="chap"></span></div></div>
   <div id="cap"></div>
-  <svg id="grain" viewBox="0 0 2320 1480"><filter id="nz"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="2320" height="1480" filter="url(#nz)"/></svg>
+  <div id="grain"></div>
   <div id="scan"></div>
   <div id="vignette"></div>
   <div id="redflash"></div>
@@ -627,7 +627,7 @@ function redflash(at, peak = 0.5, d = 0.6) { tl.fromTo("#redflash", { opacity: p
 // ---------- fundo vivo ----------
 tl.to("#bg-glow", { x: -900, y: 300, duration: END, ease: "sine.inOut" }, 0);
 tl.to("#bg-grid", { x: 80, y: 80, duration: END, ease: "none" }, 0);
-tl.to("#grain", { x: 160, y: 120, duration: END, ease: `steps(${Math.round(END * 12)})` }, 0);
+tl.to("#grain", { x: 256 * 3, y: 256 * 2, duration: END, ease: `steps(${Math.round(END * 12)})` }, 0);
 tl.fromTo("#fadeout", { opacity: 1 }, { opacity: 0, duration: 1.2, ease: "power2.out" }, 0);
 tl.to("#fadeout", { opacity: 1, duration: 0.9, ease: "power2.in" }, END - 0.9);
 
@@ -1094,7 +1094,7 @@ $$(".ering").forEach((r, i) => tl.fromTo(r, { scale: 0.2, opacity: 0, transformO
 draw("#bolt3", tHit + 0.3, 0.8, "power3.out");
 rise("#e-sub", tHit + 0.7);
 rise("#e-sub2", tHit + 0.9);
-(CUES.beep || []).forEach((b) => { tl.fromTo("#bolt3", { strokeWidth: 6 }, { strokeWidth: 2.4, duration: 0.4, immediateRender: false }, b); redflash(b, 0.18, 0.4); });
+(CUES.beep || []).forEach((b) => { tl.fromTo("#bolt3", { strokeWidth: 14 }, { strokeWidth: 6, duration: 0.4, immediateRender: false }, b); redflash(b, 0.18, 0.4); });
 if (CUES.online) rise("#e-online", CUES.online[0], 0.4);
 tl.to("#e-name", { scale: 1.05, duration: END - tHit - 0.4, ease: "none" }, tHit + 0.4);
 

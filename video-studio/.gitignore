@@ -18,6 +18,7 @@ node_modules/
 edits/rock-os/build/vo/
 edits/rock-os/build/mix_raw.wav
 edits/rock-os/assets/master.wav
+!edits/rock-os/assets/grain.png
 edits/rock-os/snapshots/
 edits/*/work-*/
 edits/*/.*hf-transaction*/
