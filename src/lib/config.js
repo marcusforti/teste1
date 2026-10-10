@@ -49,6 +49,15 @@ const config = {
       "Wise_Woman",
     ],
     emotions: ["happy", "neutral", "surprised", "sad", "angry", "fearful", "disgusted"],
+    // MiniMax TTS speed (0.5–2.0). 0.77 ≈ speech 1.3× longer, closer to a natural speaking pace.
+    speeds: [
+      { value: 0.77, label: "Natural (1,3× mais longo)" },
+      { value: 0.85, label: "Um pouco mais lento" },
+      { value: 1, label: "Normal" },
+      { value: 1.15, label: "Mais rápido" },
+      { value: 1.3, label: "Rápido (1,3×)" },
+    ],
+    defaultSpeed: 0.77,
   },
 };
 

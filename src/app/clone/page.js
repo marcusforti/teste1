@@ -6,7 +6,7 @@ import { FiUpload, FiLoader, FiMic, FiVideo, FiUser, FiPlus, FiAlertCircle, FiTr
 import toast from "react-hot-toast";
 import config from "@/lib/config";
 
-const { presetVoices, emotions, maxPhotos, maxScriptChars, costs } = config.clone;
+const { presetVoices, emotions, speeds, defaultSpeed, maxPhotos, maxScriptChars, costs } = config.clone;
 const POLL_MS = 8000;
 // MuAPI reports pending/queued/starting/processing while a job runs.
 const isActive = (status) => status !== "completed" && status !== "failed";
@@ -204,6 +204,7 @@ function VideoPanel({ clone, onChanged }) {
   const [scene, setScene] = useState("");
   const [voice, setVoice] = useState(voiceReady ? "clone" : presetVoices[0]);
   const [emotion, setEmotion] = useState("happy");
+  const [speed, setSpeed] = useState(defaultSpeed);
   const [resolution, setResolution] = useState("480p");
   const [busy, setBusy] = useState(false);
 
@@ -216,7 +217,7 @@ function VideoPanel({ clone, onChanged }) {
   const generate = async () => {
     setBusy(true);
     try {
-      await postJson(`/api/clones/${clone.id}/video`, { script, scene, voice, emotion, resolution });
+      await postJson(`/api/clones/${clone.id}/video`, { script, scene, voice, emotion, speed, resolution });
       toast.success("Gerando vídeo: cena → voz → animação");
       onChanged();
     } catch (e) {
@@ -242,13 +243,16 @@ function VideoPanel({ clone, onChanged }) {
         value={scene}
         onChange={(e) => setScene(e.target.value)}
       />
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
         <select className={inputClass} value={voice} onChange={(e) => setVoice(e.target.value)} aria-label="Voz">
           {voiceReady && <option value="clone">Minha voz clonada</option>}
           {presetVoices.map((v) => <option key={v} value={v}>{v.replace(/_/g, " ")}</option>)}
         </select>
         <select className={inputClass} value={emotion} onChange={(e) => setEmotion(e.target.value)} aria-label="Emoção">
           {emotions.map((e) => <option key={e} value={e}>{e}</option>)}
+        </select>
+        <select className={inputClass} value={speed} onChange={(e) => setSpeed(Number(e.target.value))} aria-label="Velocidade da fala">
+          {speeds.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
         <select className={inputClass} value={resolution} onChange={(e) => setResolution(e.target.value)} aria-label="Resolução">
           <option value="480p">480p</option>

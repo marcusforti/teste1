@@ -45,6 +45,10 @@ export async function POST(req, { params }) {
     }
 
     const emotion = cloneConfig.emotions.includes(body.emotion) ? body.emotion : "neutral";
+    const requestedSpeed = Number(body.speed);
+    const speed = Number.isFinite(requestedSpeed)
+      ? Math.min(2, Math.max(0.5, requestedSpeed))
+      : cloneConfig.defaultSpeed;
     const resolution = body.resolution === "720p" ? "720p" : "480p";
     const language = body.language === "auto" ? "auto" : "Portuguese";
 
@@ -62,6 +66,7 @@ export async function POST(req, { params }) {
       script,
       voiceId,
       emotion,
+      speed,
       language,
       resolution,
     });
