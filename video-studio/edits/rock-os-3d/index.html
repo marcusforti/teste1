@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="pt-BR" data-resolution="landscape">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1920, height=1080" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" />
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/FontLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/geometries/TextGeometry.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/MaskPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="assets/font-bsd900.js"></script>
+<style>
+:root{
+  --ink:#0c0a0a;--surface:#161212;--surface2:#201919;--line:#3a2c2a;--fg:#f4eee9;--muted:#b3a59f;
+  --red:#e0140c;--hot:#ff3b30;--ok:#3fcf7e;--warn:#f3b23b;
+  --display:"Big Shoulders Display",Impact,"Arial Narrow",sans-serif;
+  --body:"Barlow","Segoe UI",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink)}
+#root{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--ink);color:var(--fg);font-family:var(--body)}
+#world{position:absolute;inset:0}
+#gl{position:absolute;left:0;top:0;width:1920px;height:1080px}
+.scene{position:absolute;inset:0;opacity:0;visibility:hidden;perspective:1800px}
+.abs{position:absolute}
+.disp{font-family:var(--display);font-weight:900;text-transform:uppercase;line-height:.9}
+.mono{font-family:var(--mono)}
+.red{color:var(--hot)}
+.eyebrow{font-family:var(--mono);font-size:22px;letter-spacing:.18em;text-transform:uppercase;color:var(--hot)}
+.h2{font-family:var(--display);font-weight:900;text-transform:uppercase;line-height:.9;font-size:110px;text-shadow:0 10px 40px rgba(0,0,0,.6)}
+.hide{opacity:0;visibility:hidden}
+.plate{position:absolute;left:-60px;top:-34px;width:2040px;height:1148px;object-fit:cover}
+.scrim{position:absolute;inset:0;background:linear-gradient(90deg,rgba(12,10,10,.92) 0%,rgba(12,10,10,.55) 45%,rgba(12,10,10,.25) 100%)}
+.scrim-top{position:absolute;left:0;right:0;top:0;height:380px;background:linear-gradient(180deg,rgba(12,10,10,.95),rgba(12,10,10,0))}
+.pre{position:absolute;left:0;top:0;width:2px;height:2px;opacity:0}
+
+#bg-glow{position:absolute;width:1400px;height:1400px;left:900px;top:-500px;border-radius:50%;background:radial-gradient(circle,rgba(224,20,12,.30),rgba(224,20,12,.08) 40%,transparent 65%)}
+#bg-grid{position:absolute;inset:-80px;opacity:.07;background-image:linear-gradient(var(--muted) 1px,transparent 1px),linear-gradient(90deg,var(--muted) 1px,transparent 1px);background-size:80px 80px}
+#grain{position:absolute;left:-256px;top:-256px;width:2432px;height:1592px;opacity:.3;background:url(assets/grain.png) repeat;pointer-events:none}
+#vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,0,0,.7) 100%)}
+#bars{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 0 #000}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+#redflash{position:absolute;inset:0;background:var(--red);opacity:0;pointer-events:none}
+#fadeout{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
+#hud{position:absolute;left:0;right:0;top:0;height:70px;opacity:0}
+#hud .l{position:absolute;left:56px;top:30px;font-family:var(--mono);font-size:17px;letter-spacing:.14em;color:var(--muted)}
+#hud .l b{color:var(--fg)} #hud .l i{font-style:normal;color:var(--hot)}
+#hud .r{position:absolute;right:56px;top:30px;font-family:var(--mono);font-size:17px;letter-spacing:.14em;color:var(--muted)}
+#cap{position:absolute;left:0;right:0;bottom:44px;display:flex;justify-content:center;pointer-events:none}
+.capline{position:absolute;bottom:0;max-width:1500px;text-align:center;font-family:var(--body);font-weight:600;font-size:34px;line-height:1.25;color:#fff;background:rgba(8,6,6,.72);padding:8px 22px;border-radius:10px;opacity:0;visibility:hidden}
+
+.card{background:rgba(22,18,18,.92);border:1.5px solid var(--line);border-radius:18px}
+.tag{display:inline-block;font-family:var(--mono);font-size:16px;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:999px;border:1.5px solid var(--line);color:var(--muted)}
+.device{position:absolute;border:14px solid #2a2222;border-radius:30px;background:#0f0d0d;box-shadow:0 60px 120px rgba(0,0,0,.8),0 0 0 1px #3a2c2a,0 0 80px rgba(224,20,12,.25)}
+.devbar{display:flex;justify-content:space-between;font-family:var(--mono);font-size:17px;color:var(--muted);letter-spacing:.06em}
+.live{color:var(--ok)}
+.feed{position:absolute;border-radius:16px;overflow:hidden;border:1.5px solid var(--line);background:#090707}
+.feed .hudt{position:absolute;left:16px;top:14px;font-family:var(--mono);font-size:18px;color:#fff;background:rgba(0,0,0,.6);padding:5px 10px;border-radius:7px;z-index:3}
+.feed .hudt i{font-style:normal;color:var(--hot)}
+.feed .hudr{position:absolute;right:16px;top:14px;font-family:var(--mono);font-size:18px;color:#fff;background:rgba(0,0,0,.6);padding:5px 10px;border-radius:7px;z-index:3}
+.feed .scanl{position:absolute;inset:0;opacity:.14;background:repeating-linear-gradient(0deg,#000 0 2px,transparent 2px 4px);z-index:2;pointer-events:none}
+.feed img.ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.bbox{position:absolute;border:3px solid var(--ok);border-radius:4px;z-index:2}
+.bbox span{position:absolute;left:-3px;top:-30px;font-family:var(--mono);font-weight:700;font-size:16px;padding:4px 8px;background:var(--ok);color:#0b0909;white-space:nowrap}
+.bbox.bad{border-color:var(--hot)}.bbox.bad span{background:var(--hot)}
+.bbox.warn{border-color:var(--warn)}.bbox.warn span{background:var(--warn)}
+.bbox.dashed{border-style:dashed}
+
+/* S1 */
+#h-brand{left:0;right:0;top:120px;text-align:center;font-family:var(--mono);font-size:22px;letter-spacing:.3em;color:#e9dcd6}
+#h-lines{position:absolute;left:0;right:0;top:300px;display:flex;flex-direction:column;align-items:center;gap:18px}
+#h-lines .disp{text-align:center;text-shadow:0 12px 50px rgba(0,0,0,.9)}
+#h1a{font-size:210px}#h1b,#h1c{font-size:116px}
+/* S2 */
+#p-head{left:110px;top:160px;width:720px}
+#p-head .h2{font-size:128px;margin-top:22px}
+#p-sub{margin-top:28px;font-size:30px;color:var(--muted);line-height:1.35}
+/* S3 */
+#r-tag1{position:absolute;left:0;right:0;top:760px;text-align:center;font-size:76px;text-shadow:0 10px 40px #000}
+#r-tag2{position:absolute;left:0;right:0;top:846px;text-align:center;font-size:50px;color:#d8ccc6;text-shadow:0 10px 40px #000}
+/* S4 / S12 */
+#n-head,#i-head{left:110px;top:100px}
+#n-head .h2,#i-head .h2{font-size:92px;margin-top:14px}
+#i-list{position:absolute;right:110px;top:300px;width:470px;display:grid;gap:14px}
+.cfg{font-family:var(--mono);font-size:26px;padding:16px 20px;border-radius:12px;background:rgba(22,18,18,.9);border:1.5px solid #3f6b3a;color:var(--ok)}
+#i-go{font-size:64px;color:var(--ok);margin-top:10px}
+/* S5 */
+#f-head{left:110px;top:110px;z-index:3}
+#f-head .h2{font-size:120px;margin-top:14px}
+.src{position:absolute;left:110px;width:330px;font-family:var(--mono);font-size:32px;font-weight:600;padding:20px 26px;border-radius:14px;background:rgba(32,25,25,.92);border:1.5px solid var(--line);z-index:3}
+.src small{display:block;font-size:17px;font-weight:400;color:var(--muted);margin-top:4px}
+.fly{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--hot);box-shadow:0 0 24px var(--hot);z-index:4}
+#kds{left:560px;top:300px;width:1240px;height:620px;padding:22px;transform-style:preserve-3d}
+#kds-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:20px;transform-style:preserve-3d}
+.ticket{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:16px;border-top:7px solid var(--ok);display:grid;gap:12px;align-content:start;height:470px}
+.ticket.mid{border-top-color:var(--warn)}.ticket.late{border-top-color:var(--hot);box-shadow:0 0 0 2px var(--hot)}
+.ticket header{display:flex;justify-content:space-between;align-items:baseline}
+.ticket .num{font-family:var(--display);font-weight:900;font-size:44px}
+.ticket .tm{font-family:var(--mono);font-size:24px}
+.ticket .sbadge{justify-self:start;font-family:var(--mono);font-size:16px;padding:4px 10px;border-radius:7px;background:var(--surface2);border:1px solid var(--line);color:var(--muted)}
+.ticket ul{list-style:none;display:grid;gap:8px;font-size:23px}
+.ticket li b{color:var(--hot);margin-right:6px}
+.ticket .camst{font-family:var(--mono);font-size:15px;color:var(--muted)}
+.ticket .btn{font-weight:700;font-size:20px;background:var(--red);color:#fff;border-radius:10px;padding:10px;text-align:center;margin-top:auto}
+/* S6 */
+#t-dev{left:220px;top:70px;width:620px;height:900px;padding:22px}
+#t-menu{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+.item{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:6px;position:relative;overflow:hidden}
+.item .ph{height:140px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 70%,rgba(224,20,12,.25),transparent 70%)}
+.item .ph img{max-width:96%;max-height:136px;filter:drop-shadow(0 12px 14px rgba(0,0,0,.6))}
+.item b{font-family:var(--display);font-size:30px;text-transform:uppercase;line-height:1}
+.item .p{font-family:var(--mono);font-size:20px;color:var(--hot)}
+.badge{position:absolute;right:10px;top:10px;font-family:var(--mono);font-size:13px;background:var(--red);color:#fff;padding:3px 8px;border-radius:5px;letter-spacing:.06em;z-index:2}
+#t-cart{margin-top:16px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:10px}
+#t-cart .row{display:flex;justify-content:space-between;font-size:23px}
+#t-total{display:flex;justify-content:space-between;font-family:var(--display);font-weight:800;font-size:38px;text-transform:uppercase;border-top:1px solid var(--line);padding-top:10px}
+#t-up{position:absolute;left:22px;right:22px;bottom:22px;background:#1b0f0e;border:2px dashed var(--hot);border-radius:14px;padding:18px;display:grid;gap:10px}
+#t-up .q{font-family:var(--display);font-weight:800;font-size:40px;text-transform:uppercase;line-height:1}
+#t-up .btns{display:flex;gap:10px}
+.ubtn{font-weight:700;font-size:22px;border-radius:10px;padding:10px 22px;background:var(--red);color:#fff}
+.ubtn.g{background:transparent;border:1.5px solid var(--line);color:var(--fg)}
+.tap{position:absolute;width:90px;height:90px;border-radius:50%;border:5px solid #fff;box-shadow:0 0 30px rgba(255,255,255,.6);opacity:0;z-index:8}
+#t-burst{position:absolute;left:150px;top:330px;width:700px;z-index:7;filter:drop-shadow(0 50px 60px rgba(0,0,0,.75))}
+#t-burst-glow{position:absolute;left:60px;top:220px;width:900px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(255,59,48,.55),transparent 65%);z-index:6}
+#t-right{left:980px;top:150px;width:860px;z-index:5}
+#t-right .disp{font-size:116px;text-shadow:0 10px 40px #000}
+#t-right .big{font-size:160px}
+/* S7 */
+#v-head{left:110px;top:80px;z-index:3}
+#v-head .h2{font-size:84px;margin-top:12px}
+/* S8 */
+#m-feed{left:80px;top:96px;width:1220px;height:840px}
+#m-panel{position:absolute;left:1340px;top:96px;width:500px;height:840px;padding:30px;display:flex;flex-direction:column;gap:18px}
+#m-panel .num{font-family:var(--display);font-weight:900;font-size:86px;line-height:.9}
+.mrow{display:flex;justify-content:space-between;align-items:center;font-size:27px;padding:16px 18px;border-radius:12px;background:var(--surface2);border:1.5px solid var(--line)}
+.mrow .st{font-family:var(--mono);font-size:17px;color:var(--muted)}
+.mrow.ok{border-color:#3f6b3a}.mrow.ok .st{color:var(--ok)}
+.mrow.bad{border-color:var(--hot);background:rgba(224,20,12,.16)}.mrow.bad .st{color:var(--hot)}
+#m-banner{position:absolute;left:0;right:0;bottom:0;height:70px;display:flex;align-items:center;padding-left:24px;font-family:var(--mono);font-weight:700;font-size:24px;z-index:4}
+#m-stamp,#m-stamp2{position:absolute;top:120px;font-family:var(--display);font-weight:900;font-size:120px;text-transform:uppercase;padding:6px 30px;border-radius:14px;transform:rotate(-7deg);z-index:5;background:rgba(12,10,10,.55)}
+#m-stamp{left:170px;color:var(--hot);border:10px solid var(--hot)}
+#m-stamp2{left:300px;color:var(--ok);border:10px solid var(--ok)}
+#m-glow{position:absolute;inset:0;box-shadow:inset 0 0 0 8px var(--hot),inset 0 0 120px rgba(255,59,48,.55);opacity:0;z-index:3;pointer-events:none}
+#m-count{position:absolute;left:24px;bottom:90px;font-family:var(--mono);font-size:24px;color:#ddd;z-index:4;text-shadow:0 2px 8px #000}
+/* S9 */
+#q-grid{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-style:preserve-3d}
+.qt{position:absolute;width:840px;height:390px;transform-style:preserve-3d}
+.qt .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;overflow:hidden}
+.qt .back{transform:rotateY(180deg);background:linear-gradient(135deg,#1e1414,#120d0d);border:2px solid var(--hot);display:flex;flex-direction:column;justify-content:center;padding:40px 50px;gap:6px}
+.qt .back .n{font-family:var(--display);font-weight:900;font-size:170px;line-height:.85;color:var(--fg)}
+.qt .back .l{font-family:var(--mono);font-size:24px;letter-spacing:.12em;color:var(--hot);text-transform:uppercase}
+.toast{position:absolute;right:20px;bottom:20px;width:380px;background:#14110f;border:2px solid var(--hot);border-radius:14px;padding:14px 16px;z-index:4;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+.toast b{display:block;font-family:var(--display);font-size:32px;text-transform:uppercase;line-height:1}
+.toast .ex{font-family:var(--mono);font-size:15px;color:var(--muted);margin-top:4px}
+.toast .go{display:inline-block;margin-top:10px;font-weight:700;font-size:19px;background:var(--red);color:#fff;border-radius:9px;padding:7px 14px}
+#q-dim{position:absolute;inset:0;background:#0c0a0a;opacity:0;z-index:5;pointer-events:none}
+#s-big{position:absolute;left:0;right:0;top:400px;text-align:center;font-size:230px;z-index:6;text-shadow:0 20px 60px #000}
+/* S10 */
+#a-head{left:110px;top:90px;z-index:3}
+#a-head .h2{font-size:104px;margin-top:14px;position:relative;height:100px}
+#a-head .h2 div{position:absolute;left:0;top:0;white-space:nowrap}
+#a-ring{position:absolute;left:700px;top:300px;width:520px;height:600px;transform-style:preserve-3d}
+.agent{position:absolute;left:0;top:0;width:520px;height:600px;padding:26px;display:flex;flex-direction:column;gap:14px;backface-visibility:hidden}
+.agent h3{font-family:var(--display);font-weight:900;font-size:52px;text-transform:uppercase;line-height:.92}
+.agent p{font-size:23px;color:var(--muted);line-height:1.35}
+.agent .says{margin-top:auto;font-family:var(--mono);font-size:19px;line-height:1.45;background:var(--surface2);border-radius:10px;padding:14px;min-height:150px;border-left:4px solid var(--red)}
+.agent .appr{position:absolute;right:20px;top:22px;font-family:var(--mono);font-size:14px;padding:6px 12px;border-radius:999px;border:2px solid var(--ok);color:var(--ok);opacity:0}
+/* S11 */
+#d-stage{position:absolute;left:250px;top:60px;width:460px;height:920px;transform-style:preserve-3d}
+#d-phone{position:absolute;inset:0;border-radius:64px;background:#111;border:14px solid #2a2222;box-shadow:0 60px 120px rgba(0,0,0,.8),0 0 0 2px #4a3a38,0 0 90px rgba(224,20,12,.3);overflow:hidden}
+#d-edge{position:absolute;left:0;top:30px;width:28px;height:860px;background:linear-gradient(90deg,#1a1414,#3a2c2a,#1a1414);transform-origin:0 50%;transform:rotateY(-90deg);border-radius:14px}
+#d-screen{position:absolute;inset:0;background:radial-gradient(circle at 50% 20%,rgba(224,20,12,.45),transparent 60%),#0d0a0a}
+#d-lock{position:absolute;left:0;right:0;top:120px;text-align:center}
+#d-lock .t{font-family:var(--display);font-weight:800;font-size:150px;line-height:1}
+#d-lock .dt{font-family:var(--mono);font-size:18px;color:var(--muted);letter-spacing:.1em}
+#d-notif{position:absolute;left:18px;right:18px;top:420px;background:rgba(40,32,30,.92);border-radius:22px;padding:18px;display:grid;gap:6px;border:1px solid #4a3a38}
+#d-notif .app{font-family:var(--mono);font-size:15px;color:var(--muted);display:flex;justify-content:space-between}
+#d-notif b{font-size:22px}#d-notif p{font-size:19px;color:#ddd}
+#d-report{position:absolute;inset:0;background:#0d0a0a;padding:70px 22px 22px;display:flex;flex-direction:column;gap:12px;opacity:0}
+#d-report .rh{font-family:var(--display);font-weight:900;font-size:44px;text-transform:uppercase;line-height:.95}
+.drow{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:2px 10px}
+.drow b{font-size:22px}.drow .v{font-family:var(--mono);font-size:16px;color:var(--muted)}
+.drow .pill{grid-row:span 2;align-self:center;font-family:var(--mono);font-size:13px;padding:4px 8px;border-radius:999px;border:1.5px solid}
+.pill.g{color:var(--ok);border-color:#3f6b3a}.pill.y{color:var(--warn);border-color:#6b5524}.pill.r{color:var(--hot);border-color:var(--red)}
+#d-ins{background:#1b0f0e;border:1.5px solid var(--red);border-radius:14px;padding:14px;font-size:18px;line-height:1.4;min-height:200px;white-space:pre-line}
+#d-ins .who{font-family:var(--mono);font-size:14px;color:var(--hot);letter-spacing:.08em;margin-bottom:6px}
+#d-foot{font-family:var(--mono);font-size:13px;color:var(--muted);text-align:center}
+#d-right{left:820px;top:120px;width:1000px}
+#d-right .h2{font-size:96px;margin-top:14px}
+#d-words{margin-top:40px;display:grid;gap:8px}
+#d-words .disp{font-size:96px}
+/* S13 */
+#c-wrap{left:110px;top:220px}
+#c-wrap .disp{font-size:132px;margin-top:20px;text-shadow:0 10px 40px #000}
+/* S14 */
+#e-lines{position:absolute;left:0;right:0;top:250px;display:flex;flex-direction:column;align-items:center;gap:14px}
+#e-lines .disp{text-shadow:0 14px 50px #000}
+#e1,#e2{font-size:150px}#e3{font-size:250px}
+#e-sub{position:absolute;left:0;right:0;top:770px;text-align:center;font-family:var(--mono);font-size:28px;letter-spacing:.26em;color:var(--fg)}
+#e-sub2{position:absolute;left:0;right:0;top:820px;text-align:center;font-family:var(--mono);font-size:20px;letter-spacing:.24em;color:var(--muted)}
+#e-online{position:absolute;left:0;right:0;top:890px;text-align:center;font-family:var(--mono);font-size:22px;letter-spacing:.2em;color:var(--ok)}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="122.38" data-width="1920" data-height="1080">
+  <audio id="master" src="assets/master.wav" data-start="0" data-duration="122.38" data-track-index="0"></audio>
+
+  <!-- imagens usadas como textura no WebGL (precisam estar carregadas antes do 1º quadro) -->
+  <img class="pre" id="img-neon" src="assets/img/neon.jpg" alt="" />
+  <img class="pre" id="img-city" src="assets/img/city.jpg" alt="" />
+  <img class="pre" id="img-b19" src="assets/img/cut_b19.png" alt="" />
+  <img class="pre" id="img-b3" src="assets/img/cut_b3.png" alt="" />
+  <img class="pre" id="img-b17" src="assets/img/cut_b17.png" alt="" />
+  <img class="pre" id="img-b13" src="assets/img/cut_b13.png" alt="" />
+  <img class="pre" id="img-cctv" src="assets/img/cut_cctv.png" alt="" />
+  <img class="pre" id="img-feed-chop" src="assets/img/feed_chop.jpg" alt="" />
+  <img class="pre" id="img-feed-table" src="assets/img/feed_table.jpg" alt="" />
+  <img class="pre" id="img-feed-kitchen" src="assets/img/feed_kitchen.jpg" alt="" />
+  <img class="pre" id="img-feed-bar" src="assets/img/feed_bar.jpg" alt="" />
+  <img class="pre" id="img-feed-moto" src="assets/img/feed_moto.jpg" alt="" />
+  <img class="pre" id="img-feed-terrace" src="assets/img/feed_terrace.jpg" alt="" />
+  <img class="pre" id="img-feed-booths" src="assets/img/feed_booths.jpg" alt="" />
+  <img class="pre" id="img-feed-neon" src="assets/img/feed_neon.jpg" alt="" />
+
+  <div id="world">
+    <div id="bg-glow"></div>
+    <div id="bg-grid"></div>
+    <canvas id="gl" width="1920" height="1080"></canvas>
+
+    <!-- S1 · GANCHO (3D: neon + pulso + brasas) -->
+    <div class="scene" id="s1">
+      <div id="h-brand" class="abs hide">THE ROCK BURGERS · SOROCABA &amp; ITU</div>
+      <div id="h-lines">
+        <div id="h1a" class="disp hide">Três lojas.</div>
+        <div id="h1b" class="disp hide">Milhares de pedidos por noite.</div>
+        <div id="h1c" class="disp hide">E nenhum sistema que enxerga <span class="red">o todo.</span></div>
+      </div>
+    </div>
+
+    <!-- S2 · PROBLEMA (3D: painéis) -->
+    <div class="scene" id="s2">
+      <div id="p-head" class="abs">
+        <div class="eyebrow">Onde a The Rock está hoje</div>
+        <div class="h2"><div id="p-t1" class="hide">Quatro sistemas.</div><div id="p-t2" class="hide red">Nenhuma visão do todo.</div></div>
+        <div id="p-sub" class="hide">Cada loja olha um painel diferente. O dono junta números de vários lugares para saber como foi o dia.</div>
+      </div>
+    </div>
+
+    <!-- S3 · REVEAL (3D: logo) -->
+    <div class="scene" id="s3">
+      <div id="r-tag1" class="disp hide">Um cérebro só</div>
+      <div id="r-tag2" class="disp hide">para as três lojas <span class="red">mais monstras</span> da região</div>
+    </div>
+
+    <!-- S4 · REDE (3D: cidade) -->
+    <div class="scene" id="s4">
+      <div class="scrim-top"></div>
+      <div id="n-head" class="abs"><div class="eyebrow">Arquitetura</div><div class="h2">A central fica na <span class="red">casa do dono</span></div></div>
+    </div>
+
+    <!-- S5 · FILA -->
+    <div class="scene" id="s5">
+      <img class="plate" id="f-plate" src="assets/img/kitchen.jpg" alt="" />
+      <div class="scrim"></div>
+      <div id="f-head" class="abs"><div class="eyebrow">Pedidos · todos os canais</div><div class="h2 hide" id="f-title">Uma fila <span class="red">só.</span></div></div>
+      <div class="src hide" style="top:330px">iFood<small>API oficial · delivery</small></div>
+      <div class="src hide" style="top:480px">Totem<small>autoatendimento</small></div>
+      <div class="src hide" style="top:630px">Mesa 7<small>salão · comanda</small></div>
+      <div class="src hide" style="top:780px">WhatsApp<small>pedido direto</small></div>
+      <div class="device" id="kds">
+        <div class="devbar"><span>KDS · CHAPA · LOJA WANEL VILLE</span><span class="live">● ao vivo</span></div>
+        <div id="kds-grid"></div>
+      </div>
+      <div id="flies"></div>
+    </div>
+
+    <!-- S6 · TOTEM -->
+    <div class="scene" id="s6">
+      <img class="plate" id="t-plate" src="assets/img/bar.jpg" alt="" />
+      <div class="device" id="t-dev">
+        <div class="devbar"><span>TOTEM · BOA VISTA</span><span>toque para pedir</span></div>
+        <div id="t-menu">
+          <div class="item" id="t-i1"><span class="badge">MAIS PEDIDO</span><div class="ph"><img src="assets/img/cut_b17.png" alt="" /></div><b>Monstro Bacon</b><span class="p">R$ 42,90</span></div>
+          <div class="item"><div class="ph"><img src="assets/img/cut_b19.png" alt="" /></div><b>Monstro Duplo</b><span class="p">R$ 49,90</span></div>
+          <div class="item"><div class="ph"><img src="assets/img/cut_b3.png" alt="" /></div><b>Smash Clássico</b><span class="p">R$ 32,90</span></div>
+          <div class="item"><span class="badge">ESCOLHA DA CASA</span><div class="ph"><img src="assets/img/cut_b13.png" alt="" /></div><b>Cheddar Melt</b><span class="p">R$ 38,90</span></div>
+        </div>
+        <div id="t-cart">
+          <div class="mono" style="font-size:16px;color:var(--muted);letter-spacing:.1em">SEU PEDIDO</div>
+          <div class="row hide" id="t-r1"><span>Monstro Bacon</span><span class="mono">R$ 42,90</span></div>
+          <div class="row hide" id="t-r2"><span>+ Bacon extra</span><span class="mono">R$ 5,00</span></div>
+          <div id="t-total"><span>Total</span><span class="mono" id="t-tv">R$ 0,00</span></div>
+        </div>
+        <div id="t-up" class="hide">
+          <div class="mono" style="font-size:16px;color:var(--hot);letter-spacing:.1em">COMBINA COM SEU PEDIDO</div>
+          <div class="q">+ Bacon extra por R$ 5,00?</div>
+          <div class="btns"><span class="ubtn" id="t-yes">Quero</span><span class="ubtn g">Agora não</span></div>
+        </div>
+      </div>
+      <div id="t-burst-glow" class="hide"></div>
+      <img id="t-burst" class="hide" src="assets/img/cut_b17.png" alt="" />
+      <div class="tap" id="tap1"></div>
+      <div class="tap" id="tap2"></div>
+      <div id="t-right" class="abs">
+        <div class="eyebrow">Totem · cardápio que vende</div>
+        <div class="disp hide" id="t-w1" style="margin-top:24px">Sem fila.</div>
+        <div class="disp hide" id="t-w2">Adicional na <span class="red">hora certa.</span></div>
+        <div class="disp hide big red" id="t-w3" style="margin-top:30px">+ Venda</div>
+        <div class="disp hide" id="t-w4" style="font-size:80px">em cada pedido</div>
+      </div>
+    </div>
+
+    <!-- S7 · ROCK VISION (3D: parede curva) -->
+    <div class="scene" id="s7">
+      <div class="scrim-top"></div>
+      <div id="v-head" class="abs"><div class="eyebrow">Rock Vision · 15 funções de câmera</div>
+        <div class="h2"><div id="v-t1" class="hide">As câmeras deixam de só gravar.</div><div id="v-t2" class="hide red">E passam a trabalhar.</div></div></div>
+    </div>
+
+    <!-- S8 · MONTAGEM -->
+    <div class="scene" id="s8">
+      <div class="feed" id="m-feed">
+        <div class="hudt"><i>●</i> CAM 03 · BANCADA DELIVERY</div>
+        <div class="hudr" id="m-clock">20:15:00</div>
+        <svg class="abs" style="left:0;top:0" width="1220" height="840" viewBox="0 0 1220 840">
+          <defs>
+            <g id="fries"><path d="M-46 -6 L46 -6 L36 74 L-36 74 Z" fill="#c4161c"/><g fill="#e9b84a"><rect x="-36" y="-50" width="10" height="56"/><rect x="-20" y="-62" width="10" height="66"/><rect x="-4" y="-54" width="10" height="60"/><rect x="12" y="-66" width="10" height="70"/><rect x="26" y="-48" width="10" height="54"/></g></g>
+            <g id="coke"><rect x="-30" y="-56" width="60" height="112" rx="8" fill="#c4161c"/><rect x="-30" y="-62" width="60" height="10" rx="3" fill="#ddd"/><rect x="-30" y="-10" width="60" height="16" fill="#fff" opacity=".85"/></g>
+            <radialGradient id="lamp" cx="50%" cy="0%" r="90%"><stop offset="0" stop-color="#ffcf9a" stop-opacity=".22"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+          </defs>
+          <rect width="1220" height="840" fill="#120e0e"/>
+          <rect x="40" y="300" width="1140" height="500" fill="#2a201d"/>
+          <g stroke="#3a2c2a" stroke-width="2"><line x1="230" y1="300" x2="230" y2="800"/><line x1="420" y1="300" x2="420" y2="800"/><line x1="610" y1="300" x2="610" y2="800"/><line x1="800" y1="300" x2="800" y2="800"/><line x1="990" y1="300" x2="990" y2="800"/></g>
+          <rect x="860" y="340" width="300" height="300" rx="10" fill="#4a3a2e"/><rect x="876" y="322" width="268" height="30" rx="6" fill="#5e4a3a"/>
+          <text x="1010" y="680" fill="#b3a59f" font-size="18" font-family="JetBrains Mono" text-anchor="middle">SACOLA #1847</text>
+          <image class="m-item" href="assets/img/cut_b3.png" x="72" y="402" width="160" height="105"/>
+          <image class="m-item" href="assets/img/cut_b3.png" x="252" y="402" width="160" height="105"/>
+          <image class="m-item" href="assets/img/cut_b3.png" x="432" y="402" width="160" height="105"/>
+          <use class="m-item" href="#fries" x="250" y="640"/>
+          <use class="m-item" href="#fries" x="450" y="640"/>
+          <use id="m-coke" href="#coke" x="1010" y="490"/>
+          <rect width="1220" height="840" fill="url(#lamp)"/>
+        </svg>
+        <div class="bbox m-box" style="left:66px;top:390px;width:172px;height:126px"><span>BURGER 98%</span></div>
+        <div class="bbox m-box" style="left:246px;top:390px;width:172px;height:126px"><span>BURGER 97%</span></div>
+        <div class="bbox m-box" style="left:426px;top:390px;width:172px;height:126px"><span>BURGER 98%</span></div>
+        <div class="bbox m-box" style="left:190px;top:560px;width:120px;height:160px"><span>BATATA 96%</span></div>
+        <div class="bbox m-box" style="left:390px;top:560px;width:120px;height:160px"><span>BATATA 95%</span></div>
+        <div class="bbox bad dashed" id="m-miss" style="left:930px;top:410px;width:160px;height:160px"><span>FALTA: COCA 350ML</span></div>
+        <div class="bbox" id="m-okc" style="left:930px;top:410px;width:160px;height:160px"><span>COCA 350ML ✓</span></div>
+        <div id="m-count">CONFERINDO 0 / 6 ITENS</div>
+        <div id="m-banner"></div>
+        <div id="m-stamp">Saída travada</div>
+        <div id="m-stamp2">Liberado ✓</div>
+        <div id="m-glow"></div>
+        <div class="scanl"></div>
+      </div>
+      <div class="card" id="m-panel">
+        <div class="eyebrow">Conferência de montagem</div>
+        <div class="num">#1847</div>
+        <div class="mono" style="font-size:19px;color:var(--muted)">WhatsApp · 20:15 · Wanel Ville</div>
+        <div class="mrow" id="m-r1"><span>3× Monstro Bacon</span><span class="st">aguardando</span></div>
+        <div class="mrow" id="m-r2"><span>2× Batata Rústica</span><span class="st">aguardando</span></div>
+        <div class="mrow" id="m-r3"><span>1× Coca 350ml</span><span class="st">aguardando</span></div>
+        <div style="margin-top:auto;font-family:var(--mono);font-size:17px;color:var(--muted);line-height:1.5">AGENTE AUDITOR<br><span style="color:var(--fg)" id="m-agent-t"></span></div>
+      </div>
+    </div>
+
+    <!-- S9 · SALÃO -->
+    <div class="scene" id="s9">
+      <div id="q-grid">
+        <div class="qt" id="q1" style="left:105px;top:110px">
+          <div class="face feed"><img class="ph" src="assets/img/feed_booths.jpg" alt="" /><div class="hudt"><i>●</i> CAM 11 · SALÃO · ATENDIMENTO</div>
+            <div class="bbox bad" id="q1b" style="left:250px;top:150px;width:300px;height:200px"><span id="q1t">MESA 12 · 5:40</span></div>
+            <div class="toast" id="q1toast"><b>Mesa 12 esperando</b><div class="ex">TABLET DO GARÇOM · CÂMERA 11</div><span class="go">Estou indo</span></div><div class="scanl"></div></div>
+          <div class="face back"><div class="l">Tempo até o atendimento</div><div class="n">5:40</div><div class="l" style="color:var(--muted)">mesa 12 · por garçom e horário</div></div>
+        </div>
+        <div class="qt" id="q2" style="left:975px;top:110px">
+          <div class="face feed"><img class="ph" src="assets/img/feed_moto.jpg" alt="" /><div class="hudt"><i>●</i> CAM 08 · BALCÃO · RETIRADA</div>
+            <div class="bbox bad" style="left:60px;top:90px;width:360px;height:250px"><span class="q2t">6:20</span></div>
+            <div class="abs mono" style="left:20px;bottom:18px;font-size:20px;color:#fff;font-weight:700;z-index:3;background:rgba(224,20,12,.85);padding:4px 10px;border-radius:6px">ENTREGADOR ESPERANDO · META 3 MIN</div><div class="scanl"></div></div>
+          <div class="face back"><div class="l">Espera do entregador</div><div class="n">6:20</div><div class="l" style="color:var(--muted)">pesa na nota do iFood</div></div>
+        </div>
+        <div class="qt" id="q3" style="left:105px;top:540px">
+          <div class="face feed"><img class="ph" src="assets/img/feed_terrace.jpg" alt="" /><div class="hudt"><i>●</i> CAM 14 · ENTRADA E CAIXA</div>
+            <div class="bbox bad" style="left:120px;top:90px;width:420px;height:230px"><span>FILA 7 · ~9 MIN</span></div>
+            <div class="abs mono" style="right:20px;bottom:18px;font-size:20px;color:#0b0909;font-weight:700;z-index:3;background:var(--ok);padding:4px 10px;border-radius:6px">TOTEM 2 LIVRE →</div><div class="scanl"></div></div>
+          <div class="face back"><div class="l">Tempo de fila</div><div class="n">~9 min</div><div class="l" style="color:var(--muted)">quantos totens e caixas abrir</div></div>
+        </div>
+        <div class="qt" id="q4" style="left:975px;top:540px">
+          <div class="face feed"><img class="ph" src="assets/img/feed_table.jpg" alt="" /><div class="hudt"><i>●</i> CAM 06 · RETORNO DE PRATOS</div>
+            <div class="bbox warn" style="left:120px;top:60px;width:200px;height:150px"><span>SOBRA · BATATA</span></div>
+            <div class="bbox warn" style="left:500px;top:200px;width:200px;height:150px"><span>SOBRA · PÃO</span></div>
+            <div class="abs disp" style="right:24px;bottom:16px;font-size:96px;z-index:3;text-shadow:0 4px 20px #000" id="q4kg">0,0 kg</div><div class="scanl"></div></div>
+          <div class="face back"><div class="l">Desperdício hoje</div><div class="n">3,2 kg</div><div class="l" style="color:var(--muted)">em quilos e em reais</div></div>
+        </div>
+      </div>
+      <div id="q-dim"></div>
+      <div id="s-big" class="disp hide">Tudo vira <span class="red">dado.</span></div>
+    </div>
+
+    <!-- S10 · AGENTES -->
+    <div class="scene" id="s10">
+      <div id="a-head" class="abs"><div class="eyebrow">Agentes de IA · construídos com Claude</div>
+        <div class="h2"><div id="a-t1">Por trás de tudo:</div><div id="a-t2" class="hide">Um time que <span class="red">não dorme.</span></div></div></div>
+      <div id="a-ring">
+        <div class="card agent"><span class="tag">Turno</span><h3>Gerente de turno</h3><p>Acompanha fila, tempos e câmeras. Chama a pessoa certa.</p><div class="says" data-t="Pedido #1902 parado há 9 min na chapa. Avisando o João."></div></div>
+        <div class="card agent"><span class="tag">Qualidade</span><h3>Auditor de montagem</h3><p>Cruza o pedido com o que a câmera viu e trava a saída.</p><div class="says" data-t="Faltou 1 Coca 350ml no #1847. Saída bloqueada."></div></div>
+        <div class="card agent"><span class="tag">Processos</span><h3>Escritor de POP</h3><p>Observa quem faz certo e escreve o passo a passo.</p><div class="says" data-t="Rascunho: POP de montagem do burger duplo, 7 passos."></div><div class="appr" id="a-appr">✓ APROVADO PELA GERÊNCIA</div></div>
+        <div class="card agent"><span class="tag">Dono</span><h3>Analista</h3><p>Compara as três lojas e entrega sugestões toda noite.</p><div class="says" data-t="Ticket médio caiu 6% na terça. Totem sem upsell ativo?"></div></div>
+      </div>
+    </div>
+
+    <!-- S11 · DONO -->
+    <div class="scene" id="s11">
+      <div id="d-stage">
+        <div id="d-edge"></div>
+        <div id="d-phone">
+          <div id="d-screen">
+            <div id="d-lock"><div class="t">00:04</div><div class="dt">SÁBADO</div></div>
+            <div id="d-notif" class="hide"><div class="app"><span>● ROCK OS</span><span>agora</span></div><b>Relatório do dia pronto</b><p>3 lojas · 23 erros pegos · 3 sugestões para amanhã</p></div>
+            <div id="d-report">
+              <div class="mono" style="font-size:14px;color:var(--hot);letter-spacing:.12em">AGENTE ANALISTA · 00:04</div>
+              <div class="rh">Relatório<br>de sexta</div>
+              <div class="drow"><b>Wanel Ville</b><span class="pill g">no ritmo</span><span class="v">312 pedidos · R$ 58,40 · 14 min</span></div>
+              <div class="drow" id="d-bv"><b>Boa Vista</b><span class="pill y">chapa atrasando</span><span class="v">268 pedidos · R$ 54,10 · 19 min</span></div>
+              <div class="drow"><b>Itu</b><span class="pill r">em implantação</span><span class="v">abre em breve</span></div>
+              <div id="d-ins"><div class="who">3 SUGESTÕES PARA AMANHÃ</div><div id="d-ins-t"></div></div>
+              <div id="d-foot">números de exemplo</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="d-right" class="abs">
+        <div class="eyebrow">Painel do dono · meia-noite</div>
+        <div class="h2">O relatório <span class="red">chega sozinho.</span></div>
+        <div id="d-words"><div class="disp hide">Vendas por loja</div><div class="disp hide">Erros</div><div class="disp hide">Atrasos</div><div class="disp hide red">3 sugestões para amanhã</div></div>
+      </div>
+    </div>
+
+    <!-- S12 · ITU (3D: cidade) -->
+    <div class="scene" id="s12">
+      <div class="scrim-top"></div>
+      <div id="i-head" class="abs"><div class="eyebrow">Expansão</div><div class="h2"><span id="i-t1" class="hide">Itu já nasce <span class="red">pronta.</span></span></div></div>
+      <div id="i-list">
+        <div class="cfg hide i-cfg">✓ Mesmos processos</div><div class="cfg hide i-cfg">✓ Mesmos alertas</div><div class="cfg hide i-cfg">✓ Mesmo padrão</div>
+        <div class="disp hide" id="i-go">Liga e opera ✓</div>
+      </div>
+    </div>
+
+    <!-- S13 · CUIDADO -->
+    <div class="scene" id="s13">
+      <img class="plate" id="c-plate" src="assets/img/booths.jpg" alt="" />
+      <div class="scrim"></div>
+      <div id="c-wrap" class="abs">
+        <div class="eyebrow">Feito do jeito certo · LGPD</div>
+        <div class="disp hide c-l">Sem reconhecimento facial.</div>
+        <div class="disp hide c-l">A imagem fica na loja.</div>
+        <div class="disp hide c-l">O foco é o <span class="red">processo.</span></div>
+      </div>
+    </div>
+
+    <!-- S14 · FINAL (3D: hambúrgueres + logo) -->
+    <div class="scene" id="s14">
+      <div id="e-lines">
+        <div id="e1" class="disp hide">Os burgers mais monstros</div>
+        <div id="e2" class="disp hide">merecem o sistema</div>
+        <div id="e3" class="disp hide red">mais monstro.</div>
+      </div>
+      <div id="e-sub" class="hide">THE ROCK BURGERS</div>
+      <div id="e-sub2" class="hide">WANEL VILLE · BOA VISTA · ITU — PROPOSTA DE VISÃO</div>
+      <div id="e-online" class="hide">● SISTEMA ONLINE</div>
+    </div>
+  </div>
+
+  <div id="hud"><div class="l"><b>ROCK <i>OS</i></b> · THE ROCK BURGERS</div><div class="r"><span id="chap"></span></div></div>
+  <div id="cap"></div>
+  <div id="grain"></div>
+  <div id="vignette"></div>
+  <div id="redflash"></div>
+  <div id="flash"></div>
+  <div id="fadeout"></div>
+</div>
+
+<script>
+const TIMING = {"total": 122.38, "segments": [{"id": "hook", "start": 3.2, "dur": 4.864, "text": "Três lojas. Milhares de pedidos por noite. E nenhum sistema que enxerga o todo.", "words": [{"start": 3.2, "end": 3.4, "word": "3"}, {"start": 3.4, "end": 3.88, "word": "lojas,"}, {"start": 4.08, "end": 4.52, "word": "milhares"}, {"start": 4.52, "end": 4.62, "word": "de"}, {"start": 4.62, "end": 5.08, "word": "pedidos"}, {"start": 5.08, "end": 5.28, "word": "por"}, {"start": 5.28, "end": 5.7, "word": "noite"}, {"start": 5.7, "end": 6.12, "word": "e"}, {"start": 6.12, "end": 6.36, "word": "nenhum"}, {"start": 6.36, "end": 6.8, "word": "sistema"}, {"start": 6.8, "end": 7.04, "word": "que"}, {"start": 7.04, "end": 7.52, "word": "enxerga"}, {"start": 7.52, "end": 7.58, "word": "o"}, {"start": 7.58, "end": 7.82, "word": "todo."}]}, {"id": "problema", "start": 9.264, "dur": 10.816, "text": "Hoje, a The Rock roda em quatro sistemas diferentes. iFood num lugar, BeeFood no outro, Suitable, WhatsApp. E o dono só descobre como foi o dia juntando números de vários lugares.", "words": [{"start": 9.26, "end": 9.52, "word": "Hoje"}, {"start": 9.52, "end": 9.7, "word": "a"}, {"start": 9.7, "end": 9.82, "word": "The"}, {"start": 9.82, "end": 10.04, "word": "Rock"}, {"start": 10.04, "end": 10.38, "word": "roda"}, {"start": 10.38, "end": 10.5, "word": "em"}, {"start": 10.5, "end": 10.74, "word": "quatro"}, {"start": 10.74, "end": 11.24, "word": "sistemas"}, {"start": 11.24, "end": 11.7, "word": "diferentes,"}, {"start": 12.4, "end": 12.66, "word": "iFood"}, {"start": 12.66, "end": 12.8, "word": "num"}, {"start": 12.8, "end": 13.1, "word": "lugar,"}, {"start": 13.36, "end": 13.64, "word": "BeeFood"}, {"start": 13.64, "end": 13.8, "word": "no"}, {"start": 13.8, "end": 14.18, "word": "outro,"}, {"start": 14.3, "end": 14.86, "word": "Suitable,"}, {"start": 14.98, "end": 15.44, "word": "WhatsApp"}, {"start": 15.82, "end": 16.08, "word": "E"}, {"start": 16.08, "end": 16.18, "word": "o"}, {"start": 16.18, "end": 16.42, "word": "dono"}, {"start": 16.42, "end": 16.54, "word": "só"}, {"start": 16.54, "end": 17.02, "word": "descobre"}, {"start": 17.02, "end": 17.2, "word": "como"}, {"start": 17.2, "end": 17.44, "word": "foi"}, {"start": 17.44, "end": 17.52, "word": "o"}, {"start": 17.52, "end": 17.8, "word": "dia,"}, {"start": 18.06, "end": 18.46, "word": "juntando"}, {"start": 18.46, "end": 18.78, "word": "números"}, {"start": 18.78, "end": 19.02, "word": "de"}, {"start": 19.02, "end": 19.32, "word": "vários"}, {"start": 19.32, "end": 19.7, "word": "lugares"}]}, {"id": "reveal", "start": 20.98, "dur": 5.141, "text": "Por isso nasceu o Rock OS. Um cérebro só, para as três lojas mais monstras da região.", "words": [{"start": 20.98, "end": 21.12, "word": "Por"}, {"start": 21.12, "end": 21.32, "word": "isso"}, {"start": 21.32, "end": 21.72, "word": "nasceu"}, {"start": 21.72, "end": 21.84, "word": "o"}, {"start": 21.84, "end": 22.1, "word": "Rock"}, {"start": 22.1, "end": 22.38, "word": "OS,"}, {"start": 22.9, "end": 23.04, "word": "um"}, {"start": 23.04, "end": 23.42, "word": "cérebro"}, {"start": 23.42, "end": 23.7, "word": "só"}, {"start": 23.7, "end": 23.96, "word": "para"}, {"start": 23.96, "end": 24.12, "word": "as"}, {"start": 24.12, "end": 24.3, "word": "três"}, {"start": 24.3, "end": 24.68, "word": "lojas"}, {"start": 24.68, "end": 24.94, "word": "mais"}, {"start": 24.94, "end": 25.44, "word": "monstras"}, {"start": 25.44, "end": 25.58, "word": "da"}, {"start": 25.58, "end": 25.84, "word": "região."}]}, {"id": "rede", "start": 27.521, "dur": 11.221, "text": "A central fica na casa do dono. Wanel Ville, Boa Vista e Itu conectadas por uma rede privada e criptografada. Se a internet cair, a loja continua operando, e sincroniza quando voltar.", "words": [{"start": 27.52, "end": 27.64, "word": "A"}, {"start": 27.64, "end": 27.94, "word": "central"}, {"start": 27.94, "end": 28.28, "word": "fica"}, {"start": 28.28, "end": 28.46, "word": "na"}, {"start": 28.46, "end": 28.72, "word": "casa"}, {"start": 28.72, "end": 28.88, "word": "do"}, {"start": 28.88, "end": 29.26, "word": "dono."}, {"start": 29.46, "end": 29.78, "word": "Wanel"}, {"start": 29.78, "end": 30.12, "word": "Ville,"}, {"start": 30.24, "end": 30.42, "word": "Boa"}, {"start": 30.42, "end": 30.78, "word": "Vista"}, {"start": 30.78, "end": 30.9, "word": "e"}, {"start": 30.9, "end": 31.14, "word": "Itu,"}, {"start": 31.3, "end": 31.88, "word": "conectadas"}, {"start": 31.88, "end": 32.1, "word": "por"}, {"start": 32.1, "end": 32.24, "word": "uma"}, {"start": 32.24, "end": 32.48, "word": "rede"}, {"start": 32.48, "end": 33.04, "word": "privada"}, {"start": 33.04, "end": 33.14, "word": "e"}, {"start": 33.14, "end": 33.96, "word": "criptografada."}, {"start": 34.34, "end": 34.5, "word": "Se"}, {"start": 34.5, "end": 34.58, "word": "a"}, {"start": 34.58, "end": 34.84, "word": "internet"}, {"start": 34.84, "end": 35.44, "word": "cair,"}, {"start": 35.56, "end": 35.56, "word": "a"}, {"start": 35.56, "end": 35.86, "word": "loja"}, {"start": 35.86, "end": 36.34, "word": "continua"}, {"start": 36.34, "end": 36.92, "word": "operando"}, {"start": 36.92, "end": 37.18, "word": "e"}, {"start": 37.18, "end": 37.84, "word": "sincroniza"}, {"start": 37.84, "end": 38.06, "word": "quando"}, {"start": 38.06, "end": 38.44, "word": "voltar."}]}, {"id": "fila", "start": 39.643, "dur": 4.587, "text": "iFood, totem, mesa e WhatsApp caem numa fila só, direto na tela da cozinha.", "words": [{"start": 39.64, "end": 40.0, "word": "iFood"}, {"start": 40.0, "end": 40.48, "word": "Totem,"}, {"start": 40.58, "end": 40.86, "word": "Mesa"}, {"start": 40.86, "end": 40.96, "word": "e"}, {"start": 40.96, "end": 41.4, "word": "WhatsApp"}, {"start": 41.4, "end": 41.94, "word": "caem"}, {"start": 41.94, "end": 42.06, "word": "numa"}, {"start": 42.06, "end": 42.4, "word": "fila"}, {"start": 42.4, "end": 42.6, "word": "só"}, {"start": 42.6, "end": 43.08, "word": "direto"}, {"start": 43.08, "end": 43.2, "word": "na"}, {"start": 43.2, "end": 43.44, "word": "tela"}, {"start": 43.44, "end": 43.56, "word": "da"}, {"start": 43.56, "end": 44.06, "word": "cozinha."}]}, {"id": "totem", "start": 45.029, "dur": 8.171, "text": "No totem, o cliente pede sem fila, e o adicional aparece na hora certa. Bacon extra por cinco reais? Mais venda em cada pedido.", "words": [{"start": 45.03, "end": 45.15, "word": "Do"}, {"start": 45.15, "end": 45.59, "word": "Totem,"}, {"start": 45.69, "end": 45.71, "word": "o"}, {"start": 45.71, "end": 46.17, "word": "cliente"}, {"start": 46.17, "end": 46.37, "word": "pede"}, {"start": 46.37, "end": 46.55, "word": "sem"}, {"start": 46.55, "end": 47.11, "word": "fila"}, {"start": 47.11, "end": 47.25, "word": "e"}, {"start": 47.25, "end": 47.33, "word": "o"}, {"start": 47.33, "end": 47.79, "word": "adicional"}, {"start": 47.79, "end": 48.29, "word": "aparece"}, {"start": 48.29, "end": 48.51, "word": "na"}, {"start": 48.51, "end": 48.65, "word": "hora"}, {"start": 48.65, "end": 49.01, "word": "certa."}, {"start": 49.39, "end": 49.67, "word": "Bei"}, {"start": 49.67, "end": 49.77, "word": "com"}, {"start": 49.77, "end": 50.07, "word": "extra"}, {"start": 50.07, "end": 50.31, "word": "por"}, {"start": 50.31, "end": 50.61, "word": "5"}, {"start": 50.61, "end": 50.95, "word": "reais,"}, {"start": 51.35, "end": 51.63, "word": "mais"}, {"start": 51.63, "end": 52.09, "word": "venda"}, {"start": 52.09, "end": 52.25, "word": "em"}, {"start": 52.25, "end": 52.47, "word": "cada"}, {"start": 52.47, "end": 53.07, "word": "pedido."}]}, {"id": "vision", "start": 54.4, "dur": 3.349, "text": "E as câmeras? Deixam de só gravar. E passam a trabalhar.", "words": [{"start": 54.4, "end": 54.52, "word": "e"}, {"start": 54.52, "end": 54.62, "word": "as"}, {"start": 54.62, "end": 55.16, "word": "câmeras"}, {"start": 55.16, "end": 55.56, "word": "deixam"}, {"start": 55.56, "end": 55.68, "word": "de"}, {"start": 55.68, "end": 55.84, "word": "só"}, {"start": 55.84, "end": 56.4, "word": "gravar"}, {"start": 56.4, "end": 56.58, "word": "e"}, {"start": 56.58, "end": 56.98, "word": "passam"}, {"start": 56.98, "end": 57.04, "word": "a"}, {"start": 57.04, "end": 57.4, "word": "trabalhar."}]}, {"id": "montagem", "start": 58.749, "dur": 10.347, "text": "Oito e quinze da noite. O pedido 1847 ia sair sem a Coca. A câmera vê, o sistema trava a saída, e o erro é corrigido antes do motoboy sair.", "words": [{"start": 58.75, "end": 59.03, "word": "Oito"}, {"start": 59.03, "end": 59.15, "word": "e"}, {"start": 59.15, "end": 59.45, "word": "quinze"}, {"start": 59.45, "end": 59.57, "word": "da"}, {"start": 59.57, "end": 59.87, "word": "noite."}, {"start": 60.31, "end": 60.35, "word": "O"}, {"start": 60.35, "end": 60.77, "word": "pedido"}, {"start": 60.77, "end": 60.91, "word": "mil"}, {"start": 60.91, "end": 61.65, "word": "oitocentos"}, {"start": 61.65, "end": 61.73, "word": "e"}, {"start": 61.73, "end": 62.15, "word": "quarenta"}, {"start": 62.15, "end": 62.15, "word": "e"}, {"start": 62.15, "end": 62.65, "word": "sete"}, {"start": 62.65, "end": 62.77, "word": "ia"}, {"start": 62.77, "end": 63.07, "word": "sair"}, {"start": 63.07, "end": 63.35, "word": "sem"}, {"start": 63.35, "end": 63.53, "word": "a"}, {"start": 63.53, "end": 63.93, "word": "coca."}, {"start": 64.33, "end": 64.41, "word": "A"}, {"start": 64.41, "end": 64.73, "word": "câmera"}, {"start": 64.73, "end": 65.01, "word": "V,"}, {"start": 65.13, "end": 65.19, "word": "o"}, {"start": 65.19, "end": 65.51, "word": "sistema"}, {"start": 65.51, "end": 65.87, "word": "trava"}, {"start": 65.87, "end": 66.01, "word": "a"}, {"start": 66.01, "end": 66.41, "word": "saída"}, {"start": 66.41, "end": 66.81, "word": "e"}, {"start": 66.81, "end": 66.91, "word": "o"}, {"start": 66.91, "end": 67.09, "word": "erro"}, {"start": 67.09, "end": 67.19, "word": "é"}, {"start": 67.19, "end": 67.67, "word": "corrigido"}, {"start": 67.67, "end": 67.95, "word": "antes"}, {"start": 67.95, "end": 68.15, "word": "do"}, {"start": 68.15, "end": 68.55, "word": "motoboy"}, {"start": 68.55, "end": 68.79, "word": "sair."}]}, {"id": "salao", "start": 70.096, "dur": 8.96, "text": "Mesa doze esperando há cinco minutos? O garçom recebe o aviso no tablet. Motoboy parado no balcão, fila no caixa, desperdício na lixeira. Tudo vira dado.", "words": [{"start": 70.1, "end": 70.32, "word": "Mesa"}, {"start": 70.32, "end": 70.52, "word": "12"}, {"start": 70.52, "end": 70.96, "word": "esperando"}, {"start": 70.96, "end": 71.14, "word": "a"}, {"start": 71.14, "end": 71.28, "word": "5"}, {"start": 71.28, "end": 71.76, "word": "minutos,"}, {"start": 72.2, "end": 72.26, "word": "o"}, {"start": 72.26, "end": 72.58, "word": "garçom"}, {"start": 72.58, "end": 73.04, "word": "recebe"}, {"start": 73.04, "end": 73.12, "word": "o"}, {"start": 73.12, "end": 73.38, "word": "aviso"}, {"start": 73.38, "end": 73.48, "word": "no"}, {"start": 73.48, "end": 73.84, "word": "tablet,"}, {"start": 74.12, "end": 74.52, "word": "motoboy"}, {"start": 74.52, "end": 74.94, "word": "parado"}, {"start": 74.94, "end": 75.04, "word": "no"}, {"start": 75.04, "end": 75.5, "word": "balcão,"}, {"start": 75.6, "end": 75.82, "word": "fila"}, {"start": 75.82, "end": 75.9, "word": "no"}, {"start": 75.9, "end": 76.34, "word": "caixa,"}, {"start": 76.66, "end": 77.24, "word": "desperdício"}, {"start": 77.24, "end": 77.38, "word": "na"}, {"start": 77.38, "end": 77.84, "word": "lixeira,"}, {"start": 78.12, "end": 78.24, "word": "tudo"}, {"start": 78.24, "end": 78.58, "word": "vira"}, {"start": 78.58, "end": 78.86, "word": "dado."}]}, {"id": "agentes", "start": 80.056, "dur": 10.581, "text": "Por trás de tudo, agentes de inteligência artificial construídos com o Claude. Um time que não dorme. Eles observam, avisam e escrevem. As decisões continuam com as pessoas.", "words": [{"start": 80.06, "end": 80.18, "word": "Por"}, {"start": 80.18, "end": 80.44, "word": "trás"}, {"start": 80.44, "end": 80.62, "word": "de"}, {"start": 80.62, "end": 80.92, "word": "tudo,"}, {"start": 81.06, "end": 81.48, "word": "agentes"}, {"start": 81.48, "end": 81.68, "word": "de"}, {"start": 81.68, "end": 82.32, "word": "inteligência"}, {"start": 82.32, "end": 82.94, "word": "artificial,"}, {"start": 83.16, "end": 83.76, "word": "construídos"}, {"start": 83.76, "end": 83.92, "word": "com"}, {"start": 83.92, "end": 84.04, "word": "o"}, {"start": 84.04, "end": 84.44, "word": "Claude,"}, {"start": 84.7, "end": 84.8, "word": "um"}, {"start": 84.8, "end": 85.06, "word": "time"}, {"start": 85.06, "end": 85.26, "word": "que"}, {"start": 85.26, "end": 85.38, "word": "não"}, {"start": 85.38, "end": 85.9, "word": "dorme."}, {"start": 86.1, "end": 86.28, "word": "Eles"}, {"start": 86.28, "end": 86.94, "word": "observam,"}, {"start": 87.0, "end": 87.42, "word": "avisam"}, {"start": 87.42, "end": 87.54, "word": "e"}, {"start": 87.54, "end": 88.1, "word": "escrevem."}, {"start": 88.38, "end": 88.52, "word": "As"}, {"start": 88.52, "end": 89.02, "word": "decisões"}, {"start": 89.02, "end": 89.68, "word": "continuam"}, {"start": 89.68, "end": 89.8, "word": "com"}, {"start": 89.8, "end": 89.94, "word": "as"}, {"start": 89.94, "end": 90.28, "word": "pessoas."}]}, {"id": "dono", "start": 91.537, "dur": 7.467, "text": "À meia-noite, o relatório chega no celular do dono. Vendas por loja, erros, atrasos, e três sugestões práticas para amanhã.", "words": [{"start": 91.54, "end": 91.64, "word": "À"}, {"start": 91.64, "end": 91.88, "word": "meia"}, {"start": 91.88, "end": 92.08, "word": "noite,"}, {"start": 92.34, "end": 92.38, "word": "o"}, {"start": 92.38, "end": 92.88, "word": "relatório"}, {"start": 92.88, "end": 93.16, "word": "chega"}, {"start": 93.16, "end": 93.32, "word": "no"}, {"start": 93.32, "end": 93.7, "word": "celular"}, {"start": 93.7, "end": 93.84, "word": "do"}, {"start": 93.84, "end": 94.26, "word": "dono,"}, {"start": 94.52, "end": 94.96, "word": "vendas"}, {"start": 94.96, "end": 95.12, "word": "por"}, {"start": 95.12, "end": 95.6, "word": "loja,"}, {"start": 95.78, "end": 96.04, "word": "erros,"}, {"start": 96.2, "end": 96.76, "word": "atrasos"}, {"start": 96.76, "end": 96.98, "word": "e"}, {"start": 96.98, "end": 97.2, "word": "três"}, {"start": 97.2, "end": 97.72, "word": "sugestões"}, {"start": 97.72, "end": 98.26, "word": "práticas"}, {"start": 98.26, "end": 98.5, "word": "para"}, {"start": 98.5, "end": 98.88, "word": "amanhã."}]}, {"id": "itu", "start": 99.904, "dur": 7.424, "text": "E quando a loja de Itu abrir, ela já nasce pronta. Mesmos processos, mesmos alertas, mesmo padrão. Liga os aparelhos e opera.", "words": [{"start": 99.9, "end": 100.0, "word": "E"}, {"start": 100.0, "end": 100.14, "word": "quando"}, {"start": 100.14, "end": 100.28, "word": "a"}, {"start": 100.28, "end": 100.58, "word": "loja"}, {"start": 100.58, "end": 100.7, "word": "de"}, {"start": 100.7, "end": 100.92, "word": "Itu"}, {"start": 100.92, "end": 101.24, "word": "abrir,"}, {"start": 101.42, "end": 101.56, "word": "ela"}, {"start": 101.56, "end": 101.76, "word": "já"}, {"start": 101.76, "end": 102.06, "word": "nasce"}, {"start": 102.06, "end": 102.44, "word": "pronta."}, {"start": 102.72, "end": 103.06, "word": "Mesmos"}, {"start": 103.06, "end": 103.74, "word": "processos,"}, {"start": 103.82, "end": 104.06, "word": "mesmos"}, {"start": 104.06, "end": 104.56, "word": "alertas,"}, {"start": 104.68, "end": 104.84, "word": "mesmo"}, {"start": 104.84, "end": 105.34, "word": "padrão."}, {"start": 105.62, "end": 105.92, "word": "Liga"}, {"start": 105.92, "end": 106.04, "word": "os"}, {"start": 106.04, "end": 106.6, "word": "aparelhos"}, {"start": 106.6, "end": 106.76, "word": "e"}, {"start": 106.76, "end": 106.96, "word": "opera."}]}, {"id": "cuidado", "start": 108.328, "dur": 4.267, "text": "Sem reconhecimento facial. A imagem fica na loja. O foco é o processo.", "words": [{"start": 108.33, "end": 108.51, "word": "Sem"}, {"start": 108.51, "end": 109.21, "word": "reconhecimento"}, {"start": 109.21, "end": 109.67, "word": "facial,"}, {"start": 109.91, "end": 109.99, "word": "a"}, {"start": 109.99, "end": 110.27, "word": "imagem"}, {"start": 110.27, "end": 110.61, "word": "fica"}, {"start": 110.61, "end": 110.79, "word": "na"}, {"start": 110.79, "end": 111.25, "word": "loja,"}, {"start": 111.41, "end": 111.47, "word": "o"}, {"start": 111.47, "end": 111.85, "word": "foco"}, {"start": 111.85, "end": 111.93, "word": "é"}, {"start": 111.93, "end": 111.95, "word": "o"}, {"start": 111.95, "end": 112.25, "word": "processo."}]}, {"id": "final", "start": 113.795, "dur": 4.181, "text": "Os burgers mais monstros merecem o sistema mais monstro. Rock OS.", "words": [{"start": 113.79, "end": 113.89, "word": "Os"}, {"start": 113.89, "end": 114.23, "word": "burgers"}, {"start": 114.23, "end": 114.53, "word": "mais"}, {"start": 114.53, "end": 115.09, "word": "monstros"}, {"start": 115.09, "end": 115.63, "word": "merecem"}, {"start": 115.63, "end": 115.75, "word": "o"}, {"start": 115.75, "end": 116.11, "word": "sistema"}, {"start": 116.11, "end": 116.43, "word": "mais"}, {"start": 116.43, "end": 116.91, "word": "monstro,"}, {"start": 117.11, "end": 117.33, "word": "Rock"}, {"start": 117.33, "end": 117.61, "word": "OS."}]}]};
+const CUES = {"zap": [0.9], "boom": [3.4, 5.28, 7.58, 102.06], "pop": [12.4, 13.36, 14.3, 14.98, 39.64, 40.0, 40.58, 40.96, 70.1, 74.12, 75.6, 76.66], "whoosh": [15.98, 27.121, 39.293, 44.679, 77.92, 108.028], "impact": [21.84, 21.84, 57.04, 117.86], "blip": [29.46, 30.24, 30.9, 60.35, 60.91, 61.73, 62.15], "powerdown": [34.84], "powerup": [37.18, 105.62], "tap": [46.17], "ding": [49.39, 92.38], "cash": [51.35], "shutter": [54.6, 55.15, 55.7, 56.25], "alarm": [63.53], "clunk": [65.51], "ok": [67.19], "alert": [72.26], "typing": [84.7], "beep": [119.46, 120.26], "online": [121.06]};
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
+const SEG = Object.fromEntries(TIMING.segments.map((s) => [s.id, s]));
+const S = (id) => SEG[id].start;
+function W(id, prefix, nth = 0) {
+  const p = norm(prefix);
+  const hits = SEG[id].words.filter((w) => norm(w.word).startsWith(p));
+  if (!hits.length) throw new Error(`palavra "${prefix}" não encontrada em ${id}`);
+  return hits[Math.min(nth, hits.length - 1)].start;
+}
+const END = TIMING.total;
+const mmss = (s) => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+const money = (v) => "R$ " + v.toFixed(2).replace(".", ",");
+</script>
+<script src="assets/gl.js"></script>
+<script>
+const tl = gsap.timeline({ paused: true });
+function scene(id, tin, tout, fade = 0.3) {
+  const el = document.getElementById(id);
+  tl.to(el, { autoAlpha: 1, duration: fade, ease: "none" }, tin);
+  tl.to(el, { autoAlpha: 0, duration: fade, ease: "none" }, tout - fade);
+}
+const slam = (el, at, from = 1.35) => tl.fromTo(el, { autoAlpha: 0, scale: from, filter: "blur(16px)" }, { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 0.34, ease: "power4.out" }, at);
+const flip3d = (el, at) => tl.fromTo(el, { autoAlpha: 0, rotationX: -80, y: 60, transformPerspective: 1200, transformOrigin: "50% 100%" }, { autoAlpha: 1, rotationX: 0, y: 0, duration: 0.55, ease: "expo.out" }, at);
+const pop = (el, at, rot = 0) => tl.fromTo(el, { autoAlpha: 0, scale: 0.5, y: 24, rotation: rot - 8 }, { autoAlpha: 1, scale: 1, y: 0, rotation: rot, duration: 0.42, ease: "back.out(2.2)" }, at);
+const rise = (el, at, d = 0.5) => tl.fromTo(el, { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: d, ease: "power3.out" }, at);
+function typeText(el, text, at, d) { const o = { n: 0 }; tl.to(o, { n: text.length, duration: d, ease: "none", onUpdate() { el.textContent = text.slice(0, Math.round(o.n)); } }, at); }
+function counter(el, from, to, at, d, fmt) { const o = { v: from }; el.textContent = fmt(from); tl.to(o, { v: to, duration: d, ease: "power2.out", onUpdate() { el.textContent = fmt(o.v); } }, at); }
+function ticker(els, bases, at, d, fmt = mmss) { const o = { v: 0 }; tl.to(o, { v: d, duration: d, ease: "none", onUpdate() { els.forEach((e, i) => (e.textContent = fmt(bases[i] + o.v))); } }, at); }
+function shake(el, at, amp = 14, n = 8) {
+  for (let i = 0; i < n; i++) tl.to(el, { x: (i % 2 ? -1 : 1) * amp * (1 - i / n), y: (i % 3 - 1) * amp * 0.5 * (1 - i / n), duration: 0.035, ease: "none" }, at + i * 0.035);
+  tl.to(el, { x: 0, y: 0, duration: 0.05 }, at + n * 0.035);
+}
+function blink(el, from, to, period = 0.5) { for (let t = from; t < to; t += period) { tl.to(el, { opacity: 0.35, duration: 0.01 }, t + period / 2); tl.to(el, { opacity: 1, duration: 0.01 }, t + period); } }
+function flash(at, peak = 0.9, d = 0.5) { tl.fromTo("#flash", { opacity: peak }, { opacity: 0, duration: d, ease: "power2.out", immediateRender: false }, at); }
+function redflash(at, peak = 0.5, d = 0.6) { tl.fromTo("#redflash", { opacity: peak }, { opacity: 0, duration: d, ease: "power2.out", immediateRender: false }, at); }
+function setAt(at, fn) { const o = { k: 0 }; tl.to(o, { k: 1, duration: 0.01, onUpdate() { fn(o.k > 0.5); } }, at); }
+
+// ---------- camada 3D: um quadro por seek ----------
+const glClock = { t: 0 };
+tl.to(glClock, { t: END, duration: END, ease: "none", onUpdate() { window.GL.render(glClock.t); } }, 0);
+
+// ---------- fundo, grão, fade ----------
+tl.to("#bg-glow", { x: -900, y: 300, duration: END, ease: "sine.inOut" }, 0);
+tl.to("#bg-grid", { x: 80, y: 80, duration: END, ease: "none" }, 0);
+tl.to("#grain", { x: 256 * 3, y: 256 * 2, duration: END, ease: `steps(${Math.round(END * 12)})` }, 0);
+tl.fromTo("#fadeout", { opacity: 1 }, { opacity: 0, duration: 1.2, ease: "power2.out" }, 0);
+tl.to("#fadeout", { opacity: 1, duration: 0.9, ease: "power2.in" }, END - 0.9);
+
+// ---------- HUD ----------
+const CHAPS = [["reveal", "02 / ROCK OS"], ["rede", "03 / ARQUITETURA"], ["fila", "04 / PEDIDOS"], ["totem", "05 / TOTEM"], ["vision", "06 / ROCK VISION"], ["agentes", "07 / AGENTES DE IA"], ["dono", "08 / PAINEL DO DONO"], ["itu", "09 / EXPANSÃO"], ["cuidado", "10 / RESPONSABILIDADE"]];
+tl.to("#hud", { opacity: 1, duration: 0.6 }, W("reveal", "Rock") + 1.2);
+tl.to("#hud", { opacity: 0, duration: 0.4 }, S("final") - 0.4);
+const chap = $("#chap");
+CHAPS.forEach(([id, label], i) => {
+  const at = i === 0 ? W("reveal", "Rock") + 1.2 : S(id) - 0.3;
+  const o = { k: 0 };
+  tl.to(o, { k: 1, duration: 0.3, onUpdate() { chap.textContent = label.slice(0, Math.ceil(label.length * o.k)); } }, at);
+});
+
+// ---------- legendas ----------
+const NO_CAP = new Set(["hook", "cuidado", "final"]);
+const capBox = $("#cap");
+TIMING.segments.forEach((seg) => {
+  if (NO_CAP.has(seg.id)) return;
+  const tw = seg.text.split(/\s+/), ww = seg.words;
+  const phrases = []; let cur = [];
+  tw.forEach((w, i) => { cur.push([w, i]); if ((/[.,?!:]$/.test(w) && cur.length >= 3) || cur.length >= 8) { phrases.push(cur); cur = []; } });
+  if (cur.length) phrases.push(cur);
+  const map = (i) => ww[Math.min(ww.length - 1, Math.round((i * (ww.length - 1)) / Math.max(1, tw.length - 1)))];
+  phrases.forEach((ph, k) => {
+    const el = document.createElement("div"); el.className = "capline"; el.textContent = ph.map((p) => p[0]).join(" "); capBox.appendChild(el);
+    const a = map(ph[0][1]).start - 0.05, nx = phrases[k + 1];
+    const b = nx ? map(nx[0][1]).start - 0.06 : map(ph.at(-1)[1]).end + 0.35;
+    tl.to(el, { autoAlpha: 1, duration: 0.08 }, a);
+    tl.to(el, { autoAlpha: 0, duration: 0.08 }, Math.max(a + 0.3, b - 0.08));
+  });
+});
+
+// =====================================================================
+// S1 · GANCHO
+// =====================================================================
+const t2 = S("problema");
+const w0 = SEG.hook.words[0].start;
+scene("s1", 0, t2 - 0.2, 0.2);
+rise("#h-brand", 1.5, 0.8);
+tl.to("#h-brand", { autoAlpha: 0, duration: 0.3 }, w0 - 0.2);
+flip3d("#h1a", w0 - 0.05);
+flip3d("#h1b", W("hook", "milhares") - 0.05);
+flip3d("#h1c", W("hook", "nenhum") - 0.05);
+tl.to(["#h1a", "#h1b"], { opacity: 0.35, duration: 0.3 }, W("hook", "nenhum"));
+shake("#world", W("hook", "todo"), 18, 10);
+redflash(W("hook", "todo"), 0.35, 0.7);
+tl.to("#h-lines", { scale: 1.06, duration: t2 - W("hook", "todo"), ease: "none" }, W("hook", "todo"));
+[0, 0.05, 0.1, 0.15].forEach((d, i) => tl.to("#h-lines", { x: i % 2 ? -30 : 26, skewX: i % 2 ? 8 : -6, duration: 0.02 }, t2 - 0.42 + d));
+
+// =====================================================================
+// S2 · PROBLEMA
+// =====================================================================
+const tRev = W("reveal", "Rock");
+scene("s2", t2 - 0.2, tRev, 0.15);
+slam("#p-t1", W("problema", "quatro") - 0.05, 1.15);
+slam("#p-t2", W("problema", "dono") - 0.1, 1.15);
+rise("#p-sub", W("problema", "juntando"));
+tl.to("#p-head", { autoAlpha: 0, x: -60, duration: 0.6, ease: "power2.in" }, tRev - 1.0);
+
+// =====================================================================
+// S3 · REVEAL
+// =====================================================================
+const t4 = S("rede");
+flash(tRev, 1, 0.6);
+shake("#world", tRev, 22, 10);
+scene("s3", tRev, t4 - 0.2, 0.05);
+flip3d("#r-tag1", W("reveal", "cérebro") - 0.15);
+rise("#r-tag2", W("reveal", "para"));
+tl.to(["#r-tag1", "#r-tag2"], { autoAlpha: 0, y: 30, duration: 0.35 }, t4 - 0.6);
+flash(t4 - 0.12, 0.5, 0.35);
+
+// =====================================================================
+// S4 · REDE (texto sobre a cidade 3D)
+// =====================================================================
+const t5 = S("fila");
+scene("s4", t4 - 0.4, t5 - 0.2);
+rise("#n-head", t4 - 0.2);
+
+// =====================================================================
+// S5 · FILA
+// =====================================================================
+const t6 = S("totem");
+scene("s5", t5 - 0.3, t6 - 0.2);
+tl.fromTo("#f-plate", { scale: 1.12 }, { scale: 1, duration: t6 - t5 + 0.3, ease: "none" }, t5 - 0.3);
+rise("#f-head", t5 - 0.3);
+slam("#f-title", W("fila", "fila") - 0.1, 1.2);
+tl.fromTo("#kds", { autoAlpha: 0, rotationY: -38, rotationX: 10, z: -400, x: 200, transformPerspective: 1800 }, { autoAlpha: 1, rotationY: -14, rotationX: 4, z: 0, x: 0, duration: 0.9, ease: "expo.out" }, t5 - 0.2);
+tl.to("#kds", { rotationY: -6, rotationX: 2, duration: t6 - t5, ease: "sine.inOut" }, t5 + 0.7);
+const TICK = [
+  [1844, "iFood", 520, [[2, "Monstro Bacon"], [1, "Batata Rústica"]], "late"],
+  [1845, "Totem", 310, [[1, "Smash Clássico"], [1, "Milkshake"]], "mid"],
+  [1846, "Mesa 7", 140, [[1, "Monstro Duplo"], [1, "Onion Rings"]], ""],
+  [1847, "WhatsApp", 0, [[3, "Monstro Bacon"], [2, "Batata Rústica"], [1, "Coca 350ml"]], ""],
+];
+const kg = $("#kds-grid"), srcs = $$(".src"), tms = [], flyBox = $("#flies");
+["iFood", "Totem", "Mesa", "WhatsApp"].forEach((w, i) => {
+  const at = W("fila", w) - 0.05;
+  tl.fromTo(srcs[i], { autoAlpha: 0, rotationY: 70, x: -60, transformPerspective: 1200 }, { autoAlpha: 1, rotationY: 0, x: 0, duration: 0.45, ease: "back.out(1.8)" }, at);
+  const [n, src, base, items, cls] = TICK[i];
+  const tk = document.createElement("article");
+  tk.className = "ticket " + cls;
+  tk.innerHTML = `<header><span class="num">#${n}</span><span class="tm">0:00</span></header><span class="sbadge">${src}</span><ul>${items.map((x) => `<li><b>${x[0]}×</b>${x[1]}</li>`).join("")}</ul><span class="camst">câmera: aguardando montagem</span><span class="btn">Pronto</span>`;
+  tk.style.opacity = 0; tk.style.visibility = "hidden";
+  kg.appendChild(tk);
+  tms.push([tk.querySelector(".tm"), base]);
+  const f = document.createElement("div"); f.className = "fly"; f.style.left = "440px"; f.style.top = 330 + i * 150 + 40 + "px"; f.style.opacity = 0; flyBox.appendChild(f);
+  const tx = 600 + 22 + (i * (1240 - 44 - 48)) / 4 + 120;
+  tl.fromTo(f, { opacity: 1, x: 0, y: 0 }, { x: tx - 440, y: 420 - (370 + i * 150), duration: 0.35, ease: "power2.in", immediateRender: false }, at + 0.15);
+  tl.to(f, { opacity: 0, duration: 0.05 }, at + 0.5);
+  tl.fromTo(tk, { autoAlpha: 0, z: 500, rotationX: -40, y: -40 }, { autoAlpha: 1, z: 0, rotationX: 0, y: 0, duration: 0.5, ease: "expo.out" }, at + 0.45);
+});
+ticker(tms.map((x) => x[0]), tms.map((x) => x[1]), t5, t6 - t5);
+
+// =====================================================================
+// S6 · TOTEM
+// =====================================================================
+const t7 = S("vision");
+scene("s6", t6 - 0.3, t7 - 0.3);
+tl.fromTo("#t-plate", { scale: 1.1, x: 40 }, { scale: 1, x: -20, duration: t7 - t6 + 0.3, ease: "none" }, t6 - 0.3);
+tl.fromTo("#t-dev", { autoAlpha: 0, rotationY: 45, z: -500, transformPerspective: 1800 }, { autoAlpha: 1, rotationY: 14, z: 0, duration: 0.9, ease: "expo.out" }, t6 - 0.3);
+tl.to("#t-dev", { rotationY: 6, duration: t7 - t6, ease: "sine.inOut" }, t6 + 0.6);
+rise("#t-right .eyebrow", t6);
+slam("#t-w1", W("totem", "sem") - 0.05, 1.15);
+slam("#t-w2", W("totem", "adicional") - 0.05, 1.15);
+const tv = $("#t-tv"); tv.textContent = money(0);
+const tPede = W("totem", "pede");
+tl.set("#tap1", { left: 220 + 22 + 14 + 130 - 45, top: 70 + 22 + 40 + 120 - 45 }, 0);
+tl.fromTo("#tap1", { opacity: 0.9, scale: 0.4 }, { opacity: 0, scale: 1.4, duration: 0.5, ease: "power2.out", immediateRender: false }, tPede);
+tl.to("#t-i1", { borderColor: "#ff3b30", boxShadow: "0 0 0 3px #ff3b30", duration: 0.15 }, tPede);
+rise("#t-r1", tPede + 0.15, 0.3);
+counter(tv, 0, 42.9, tPede + 0.15, 0.35, money);
+const tUp = W("totem", "Bei") - 0.35;
+tl.fromTo("#t-up", { autoAlpha: 0, y: 120 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: "back.out(1.6)" }, tUp);
+// o hambúrguer com bacon salta do totem em direção à câmera
+tl.fromTo("#t-burst", { autoAlpha: 0, scale: 0.18, x: -260, y: -60, rotation: -18, z: -300 }, { autoAlpha: 1, scale: 1, x: 0, y: 0, rotation: 6, z: 0, duration: 0.6, ease: "back.out(1.5)" }, tUp + 0.05);
+tl.fromTo("#t-burst-glow", { autoAlpha: 0, scale: 0.4 }, { autoAlpha: 1, scale: 1, duration: 0.5 }, tUp + 0.05);
+tl.to("#t-burst", { rotation: -4, y: -20, scale: 1.04, duration: 1.0, ease: "sine.inOut" }, tUp + 0.65);
+const tYes = tUp + 1.25;
+tl.to(["#t-burst", "#t-burst-glow"], { autoAlpha: 0, scale: 0.2, x: -420, y: 320, duration: 0.4, ease: "power3.in" }, tYes + 0.1);
+tl.set("#tap2", { left: 220 + 14 + 22 + 18 + 30, top: 70 + 900 - 14 - 22 - 18 - 40 - 22 }, 0);
+tl.fromTo("#tap2", { opacity: 0.9, scale: 0.4 }, { opacity: 0, scale: 1.4, duration: 0.5, ease: "power2.out", immediateRender: false }, tYes);
+tl.to("#t-up", { autoAlpha: 0, y: 120, duration: 0.35, ease: "power2.in" }, tYes + 0.3);
+rise("#t-r2", tYes + 0.45, 0.3);
+const o42 = { v: 42.9 };
+tl.to(o42, { v: 47.9, duration: 0.5, ease: "power2.out", onUpdate() { tv.textContent = money(o42.v); } }, tYes + 0.45);
+slam("#t-w3", W("totem", "mais") - 0.05, 1.3);
+rise("#t-w4", W("totem", "cada") - 0.1, 0.35);
+
+// =====================================================================
+// S7 · ROCK VISION (texto sobre a parede 3D)
+// =====================================================================
+const t8 = S("montagem");
+scene("s7", t7 - 0.4, t8 - 0.3, 0.3);
+slam("#v-t1", W("vision", "deixam") - 0.1, 1.12);
+const tTrab = W("vision", "trabalhar");
+slam("#v-t2", tTrab - 0.05, 1.25);
+shake("#world", tTrab, 16, 8);
+redflash(tTrab, 0.3, 0.5);
+flash(t8 - 0.05, 0.75, 0.4);
+
+// =====================================================================
+// S8 · CONFERÊNCIA DE MONTAGEM
+// =====================================================================
+const t9 = S("salao");
+scene("s8", t8 - 0.05, t9 - 0.2, 0.05);
+tl.fromTo("#m-feed", { rotationY: 8, rotationX: 4, transformPerspective: 2000 }, { rotationY: -3, rotationX: 1, scale: 1.03, duration: t9 - t8, ease: "sine.inOut" }, t8);
+tl.fromTo("#m-panel", { autoAlpha: 0, rotationY: -50, x: 80, transformPerspective: 1600 }, { autoAlpha: 1, rotationY: -8, x: 0, duration: 0.7, ease: "expo.out" }, t8 + 0.1);
+const clk = $("#m-clock"), oc = { v: 0 };
+tl.to(oc, { v: t9 - t8, duration: t9 - t8, ease: "none", onUpdate() { const s = 42 + Math.floor(oc.v); clk.textContent = `20:15:${String(s % 60).padStart(2, "0")}`; } }, t8);
+const items = $$(".m-item"), boxes = $$(".m-box"), cnt = $("#m-count");
+const placeAt = [W("montagem", "pedido"), W("montagem", "mil"), W("montagem", "oitocentos"), W("montagem", "quarenta"), W("montagem", "sete")];
+placeAt.forEach((at, i) => {
+  tl.fromTo(items[i], { opacity: 0, y: -60 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, at - 0.15);
+  tl.fromTo(boxes[i], { autoAlpha: 0, scale: 1.25 }, { autoAlpha: 1, scale: 1, duration: 0.2, ease: "power2.out" }, at + 0.1);
+  setAt(at + 0.1, (on) => (cnt.textContent = `CONFERINDO ${on ? i + 1 : i} / 6 ITENS`));
+});
+tl.set("#m-coke", { opacity: 0 }, 0);
+tl.set(["#m-miss", "#m-okc", "#m-stamp", "#m-stamp2"], { autoAlpha: 0 }, 0);
+const setRow = (sel, cls, txt, at) => { const el = $(sel), st = el.querySelector(".st"); setAt(at, (on) => { el.className = on ? "mrow " + cls : "mrow"; st.textContent = on ? txt : "aguardando"; }); };
+setRow("#m-r1", "ok", "✓ conferido", placeAt[2] + 0.2);
+setRow("#m-r2", "ok", "✓ conferido", placeAt[4] + 0.2);
+const tCoca = W("montagem", "coca");
+tl.fromTo("#m-miss", { autoAlpha: 0, scale: 1.4 }, { autoAlpha: 1, scale: 1, duration: 0.25, ease: "power4.out" }, tCoca - 0.1);
+blink("#m-miss", tCoca + 0.2, W("montagem", "corrigido") - 0.1, 0.4);
+const r3 = $("#m-r3"), r3s = r3.querySelector(".st"), ban = $("#m-banner");
+setAt(tCoca - 0.1, (on) => { r3.className = on ? "mrow bad" : "mrow"; r3s.textContent = on ? "✕ faltando" : "aguardando"; ban.style.background = on ? "rgba(224,20,12,.85)" : "transparent"; ban.style.color = "#fff"; ban.textContent = on ? "ALERTA · PEDIDO #1847 INCOMPLETO · FALTA 1 COCA 350ML" : ""; });
+for (let k = 0; k < 3; k++) tl.fromTo("#m-glow", { opacity: 1 }, { opacity: 0.15, duration: 0.3, immediateRender: false }, tCoca + k * 0.34);
+tl.to("#m-glow", { opacity: 0.25, duration: 0.2 }, tCoca + 1.05);
+const tTrava = W("montagem", "trava");
+tl.fromTo("#m-stamp", { autoAlpha: 0, scale: 2.2 }, { autoAlpha: 1, scale: 1, duration: 0.22, ease: "power4.in" }, tTrava - 0.15);
+shake("#m-feed", tTrava + 0.07, 12, 6);
+typeText($("#m-agent-t"), "Faltou 1 Coca 350ml no #1847. Saída bloqueada até corrigir.", tTrava + 0.1, 1.2);
+const tFix = W("montagem", "corrigido");
+tl.to("#m-coke", { opacity: 1, duration: 0.01 }, tFix - 0.45);
+tl.fromTo("#m-coke", { y: -260 }, { y: 0, duration: 0.4, ease: "power3.out", immediateRender: false }, tFix - 0.45);
+tl.to("#m-miss", { autoAlpha: 0, duration: 0.1 }, tFix - 0.05);
+tl.fromTo("#m-okc", { autoAlpha: 0, scale: 1.3 }, { autoAlpha: 1, scale: 1, duration: 0.2 }, tFix);
+tl.to("#m-stamp", { autoAlpha: 0, duration: 0.15 }, tFix);
+tl.fromTo("#m-stamp2", { autoAlpha: 0, scale: 2 }, { autoAlpha: 1, scale: 1, duration: 0.22, ease: "power4.in" }, tFix + 0.1);
+tl.to("#m-glow", { opacity: 0, duration: 0.2 }, tFix);
+setAt(tFix, (on) => { if (on) { r3.className = "mrow ok"; r3s.textContent = "✓ conferido"; ban.style.background = "rgba(63,207,126,.9)"; ban.style.color = "#0b0909"; ban.textContent = "PEDIDO COMPLETO · 6 / 6 · LIBERADO PARA O MOTOBOY"; cnt.textContent = "CONFERIDO 6 / 6 ITENS"; } });
+flash(W("montagem", "sair", 1), 0.6, 0.35);
+
+// =====================================================================
+// S9 · SALÃO — câmeras reais que viram dado
+// =====================================================================
+const t10 = S("agentes");
+scene("s9", t9 - 0.3, t10 - 0.2);
+tl.fromTo("#q-grid", { rotationX: 14, rotationY: -10, z: -200, transformPerspective: 2200 }, { rotationX: 4, rotationY: 6, z: 0, duration: t10 - t9, ease: "sine.inOut" }, t9 - 0.3);
+const tiles = ["#q1", "#q2", "#q3", "#q4"];
+const qAt = [W("salao", "Mesa"), W("salao", "motoboy"), W("salao", "fila"), W("salao", "desperd")];
+tiles.forEach((q, i) => tl.fromTo(q, { autoAlpha: 0, z: -600, rotationY: i % 2 ? -30 : 30 }, { autoAlpha: 1, z: 0, rotationY: 0, duration: 0.6, ease: "expo.out" }, qAt[i] - 0.25));
+const q1t = $("#q1t"), q1o = { v: 0 };
+tl.to(q1o, { v: t10 - qAt[0], duration: t10 - qAt[0], ease: "none", onUpdate() { q1t.textContent = "MESA 12 · " + mmss(340 + q1o.v); } }, qAt[0]);
+blink("#q1b", qAt[0] + 0.3, W("salao", "garçom") + 0.6, 0.5);
+tl.fromTo("#q1toast", { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.35, ease: "back.out(2)" }, W("salao", "garçom") - 0.1);
+ticker($$(".q2t"), [380], qAt[1], t10 - qAt[1]);
+counter($("#q4kg"), 0, 3.2, qAt[3], 1.2, (v) => v.toFixed(1).replace(".", ",") + " kg");
+const tTudo = W("salao", "tudo");
+tiles.forEach((q, i) => tl.to(q, { rotationY: 180, duration: 0.7, ease: "power3.inOut" }, tTudo - 0.25 + i * 0.08));
+slam("#s-big", W("salao", "dado") - 0.05, 1.4);
+tl.to("#q-dim", { opacity: 0.6, duration: 0.3 }, W("salao", "dado"));
+shake("#world", W("salao", "dado"), 10, 6);
+
+// =====================================================================
+// S10 · AGENTES — carrossel 3D
+// =====================================================================
+const t11 = S("dono");
+scene("s10", t10 - 0.3, t11 - 0.2);
+rise("#a-head", t10 - 0.2);
+const agents = $$(".agent");
+agents.forEach((a, i) => gsap.set(a, { rotationY: i * 90, z: 300, transformOrigin: "50% 50% -300px" }));
+gsap.set("#a-ring", { transformPerspective: 2400 });
+tl.fromTo("#a-ring", { autoAlpha: 0, rotationY: 120, z: -800 }, { autoAlpha: 1, rotationY: 0, z: -300, duration: 1.0, ease: "expo.out" }, W("agentes", "agentes") - 0.1);
+const tTime = W("agentes", "time");
+tl.to("#a-t1", { autoAlpha: 0, y: -40, duration: 0.25 }, tTime - 0.3);
+slam("#a-t2", tTime - 0.15, 1.2);
+const says = $$(".agent .says");
+const sayAt = [tTime + 0.2, W("agentes", "observam"), W("agentes", "avisam"), W("agentes", "escrevem")];
+says.forEach((s, i) => {
+  if (i) tl.to("#a-ring", { rotationY: -90 * i, duration: 0.6, ease: "power3.inOut" }, sayAt[i] - 0.45);
+  typeText(s, s.dataset.t, sayAt[i], 1.4);
+});
+tl.to("#a-ring", { rotationY: -180, duration: 0.6, ease: "power3.inOut" }, W("agentes", "decisoes") - 0.4);
+tl.fromTo("#a-appr", { opacity: 0, scale: 1.4 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, W("agentes", "pessoas") - 0.2);
+
+// =====================================================================
+// S11 · DONO — celular 3D
+// =====================================================================
+const t12 = S("itu");
+scene("s11", t11 - 0.3, t12 - 0.2);
+tl.fromTo("#d-stage", { autoAlpha: 0, rotationY: -75, rotationX: 10, z: -400, transformPerspective: 2000 }, { autoAlpha: 1, rotationY: -22, rotationX: 4, z: 0, duration: 1.0, ease: "expo.out" }, t11 - 0.3);
+tl.to("#d-stage", { rotationY: 14, rotationX: 0, duration: t12 - t11 - 0.5, ease: "sine.inOut" }, t11 + 0.7);
+rise("#d-right .eyebrow", t11);
+rise("#d-right .h2", W("dono", "chega") - 0.2);
+tl.fromTo("#d-notif", { autoAlpha: 0, y: -80 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: "back.out(1.8)" }, W("dono", "relatório") - 0.05);
+const tVendas = W("dono", "vendas");
+tl.to("#d-report", { opacity: 1, duration: 0.35 }, tVendas - 0.2);
+tl.to(["#d-notif", "#d-lock"], { autoAlpha: 0, duration: 0.2 }, tVendas - 0.2);
+const dw = $$("#d-words .disp");
+["vendas", "erros", "atrasos", "tres"].forEach((w, i) => flip3d(dw[i], W("dono", w) - 0.08));
+tl.fromTo("#d-bv", { boxShadow: "0 0 0 0px #f3b23b" }, { boxShadow: "0 0 0 3px #f3b23b", duration: 0.2, yoyo: true, repeat: 3, immediateRender: false }, W("dono", "atrasos"));
+typeText($("#d-ins-t"), "1. Inverter a escala da chapa no pico de sexta.\n2. Ativar o upsell no totem da Boa Vista.\n3. Fritar a batata mais perto da hora no fechamento.", W("dono", "tres"), 2.6);
+
+// =====================================================================
+// S12 · ITU (texto sobre a cidade 3D)
+// =====================================================================
+const t13 = S("cuidado");
+scene("s12", t12 - 0.3, t13 - 0.2);
+rise("#i-head", t12 - 0.2);
+slam("#i-t1", W("itu", "pronta") - 0.15, 1.2);
+const cfgs = $$(".i-cfg");
+["processos", "alertas", "padrao"].forEach((w, i) => tl.fromTo(cfgs[i], { autoAlpha: 0, x: 80, rotationY: -40, transformPerspective: 1200 }, { autoAlpha: 1, x: 0, rotationY: 0, duration: 0.45, ease: "back.out(1.8)" }, W("itu", w) - 0.05));
+flash(W("itu", "Liga") + 0.1, 0.35, 0.45);
+flip3d("#i-go", W("itu", "opera") - 0.1);
+
+// =====================================================================
+// S13 · CUIDADO
+// =====================================================================
+const t14 = S("final");
+scene("s13", t13 - 0.3, t14 - 0.2);
+tl.fromTo("#c-plate", { scale: 1.15, x: 60 }, { scale: 1.02, x: -30, duration: t14 - t13 + 0.3, ease: "none" }, t13 - 0.3);
+rise("#c-wrap .eyebrow", t13 - 0.2);
+const cl = $$(".c-l");
+const cAt = [SEG.cuidado.words[0].start, W("cuidado", "imagem") - 0.25, W("cuidado", "foco") - 0.2];
+cl.forEach((l, i) => { flip3d(l, cAt[i] - 0.05); if (i) tl.to(cl.slice(0, i), { opacity: 0.3, duration: 0.3 }, cAt[i]); });
+
+// =====================================================================
+// S14 · FINAL
+// =====================================================================
+const tHit = CUES.impact.at(-1);
+scene("s14", t14 - 0.3, END, 0.3);
+slam("#e1", SEG.final.words[0].start - 0.05, 1.15);
+slam("#e2", W("final", "merecem") - 0.05, 1.15);
+slam("#e3", W("final", "mais", 1) - 0.05, 1.5);
+shake("#world", W("final", "mais", 1) + 0.25, 10, 6);
+tl.to("#e-lines", { autoAlpha: 0, scale: 1.3, duration: 0.25, ease: "power3.in" }, tHit - 0.25);
+flash(tHit, 1, 0.8);
+shake("#world", tHit, 26, 12);
+rise("#e-sub", tHit + 0.7);
+rise("#e-sub2", tHit + 0.9);
+(CUES.beep || []).forEach((b) => redflash(b, 0.16, 0.4));
+if (CUES.online) rise("#e-online", CUES.online[0], 0.4);
+
+window.__timelines = window.__timelines || {};
+window.__timelines["main"] = tl;
+tl.seek(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+[
+ {"id":"s1","gap":0.55,"text":"Este é o Macacão Max. Ele ama explorar, brincar e descobrir o mundo.","tts":"Este é o Macacão Max. Ele ama explorar, brincar, e descobrir o mundo."},
+ {"id":"s2","gap":0.55,"text":"Quando algo não sai como ele queria, Max aprende a ficar com o sentimento.","tts":"Quando algo não sai como ele queria, Max aprende a ficar com o sentimento."},
+ {"id":"s3","gap":0.55,"text":"Então ele respira, se acalma, e dá um passo de cada vez.","tts":"Então ele respira, se acalma... e dá um passo de cada vez."},
+ {"id":"s4","gap":2.67,"text":"E uma pequena pedra azul pode abrir uma grande aventura.","tts":"E uma pequena pedra azul, pode abrir uma grande aventura."}
+]

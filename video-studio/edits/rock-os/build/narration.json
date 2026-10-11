@@ -1,0 +1,86 @@
+[
+ {
+  "id": "hook",
+  "gap": 1.2,
+  "text": "Três lojas. Milhares de pedidos por noite. E nenhum sistema que enxerga o todo.",
+  "tts": "Três lojas. Milhares de pedidos por noite. E nenhum sistema que enxerga o todo."
+ },
+ {
+  "id": "problema",
+  "gap": 0.9,
+  "text": "Hoje, a The Rock roda em quatro sistemas diferentes. iFood num lugar, BeeFood no outro, Suitable, WhatsApp. E o dono só descobre como foi o dia juntando números de vários lugares.",
+  "tts": "Hoje, a Dê Róc roda em quatro sistemas diferentes. Áifud num lugar, BeeFood no outro, Suitable, WhatsApp. E o dono só descobre como foi o dia, juntando números de vários lugares."
+ },
+ {
+  "id": "reveal",
+  "gap": 1.4,
+  "text": "Por isso nasceu o Rock OS. Um cérebro só, para as três lojas mais monstras da região.",
+  "tts": "Por isso, nasceu o Rock Ó Ésse. Um cérebro só, para as três lojas mais monstras da região."
+ },
+ {
+  "id": "rede",
+  "gap": 0.9,
+  "text": "A central fica na casa do dono. Wanel Ville, Boa Vista e Itu conectadas por uma rede privada e criptografada. Se a internet cair, a loja continua operando, e sincroniza quando voltar.",
+  "tts": "A central fica na casa do dono. Uânel Víle, Boa Vista e Itu, conectadas por uma rede privada e criptografada. Se a internet cair, a loja continua operando, e sincroniza quando voltar."
+ },
+ {
+  "id": "fila",
+  "gap": 0.8,
+  "text": "iFood, totem, mesa e WhatsApp caem numa fila só, direto na tela da cozinha.",
+  "tts": "Áifud, totem, mesa e WhatsApp, caem numa fila só, direto na tela da cozinha."
+ },
+ {
+  "id": "totem",
+  "gap": 1.2,
+  "text": "No totem, o cliente pede sem fila, e o adicional aparece na hora certa. Bacon extra por cinco reais? Mais venda em cada pedido.",
+  "tts": "No totem, o cliente pede sem fila, e o adicional aparece na hora certa. Bacon extra, por cinco reais? Mais venda, em cada pedido."
+ },
+ {
+  "id": "vision",
+  "gap": 1.0,
+  "text": "E as câmeras? Deixam de só gravar. E passam a trabalhar.",
+  "tts": "E as câmeras? Deixam de só gravar. E passam a trabalhar."
+ },
+ {
+  "id": "montagem",
+  "gap": 1.0,
+  "text": "Oito e quinze da noite. O pedido 1847 ia sair sem a Coca. A câmera vê, o sistema trava a saída, e o erro é corrigido antes do motoboy sair.",
+  "tts": "Oito e quinze da noite. O pedido mil oitocentos e quarenta e sete, ia sair sem a Coca. A câmera vê, o sistema trava a saída, e o erro é corrigido antes do motoboy sair."
+ },
+ {
+  "id": "salao",
+  "gap": 1.0,
+  "text": "Mesa doze esperando há cinco minutos? O garçom recebe o aviso no tablet. Motoboy parado no balcão, fila no caixa, desperdício na lixeira. Tudo vira dado.",
+  "tts": "Mesa doze esperando há cinco minutos? O garçom recebe o aviso no tablet. Motoboy parado no balcão. Fila no caixa. Desperdício na lixeira. Tudo vira dado."
+ },
+ {
+  "id": "agentes",
+  "gap": 0.9,
+  "text": "Por trás de tudo, agentes de inteligência artificial construídos com o Claude. Um time que não dorme. Eles observam, avisam e escrevem. As decisões continuam com as pessoas.",
+  "tts": "Por trás de tudo, agentes de inteligência artificial, construídos com o Clôde. Um time que não dorme. Eles observam, avisam e escrevem. As decisões continuam com as pessoas."
+ },
+ {
+  "id": "dono",
+  "gap": 0.9,
+  "text": "À meia-noite, o relatório chega no celular do dono. Vendas por loja, erros, atrasos, e três sugestões práticas para amanhã.",
+  "tts": "À meia-noite, o relatório chega no celular do dono. Vendas por loja, erros, atrasos, e três sugestões práticas para amanhã."
+ },
+ {
+  "id": "itu",
+  "gap": 1.0,
+  "text": "E quando a loja de Itu abrir, ela já nasce pronta. Mesmos processos, mesmos alertas, mesmo padrão. Liga os aparelhos e opera.",
+  "tts": "E quando a loja de Itú abrir, ela já nasce pronta. Mesmos processos, mesmos alertas, mesmo padrão. Liga os aparelhos, e opera."
+ },
+ {
+  "id": "cuidado",
+  "gap": 1.2,
+  "text": "Sem reconhecimento facial. A imagem fica na loja. O foco é o processo.",
+  "tts": "Sem reconhecimento facial. A imagem fica na loja. O foco é o processo."
+ },
+ {
+  "id": "final",
+  "gap": 4.4,
+  "text": "Os burgers mais monstros merecem o sistema mais monstro. Rock OS.",
+  "tts": "Os burgers mais monstros, merecem o sistema mais monstro. Rock Ó Ésse."
+ }
+]

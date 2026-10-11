@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      /* Regras de estilo: veja ../../CLAUDE.md (marca, safe zone, legendas) */
+      :root {
+        --accent: #8b5cf6; /* cor da palavra-chave */
+        --text: #ffffff;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden;
+              font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+      #stage { position: absolute; inset: 0; transform-origin: 50% 45%; }
+      #take { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+      /* Legendas a ~65% da altura, fora dos 20% de baixo e da borda direita */
+      #captions { position: absolute; left: 80px; right: 160px; top: 62%;
+                  display: flex; justify-content: center; text-align: center; }
+      .cap { position: absolute; left: 0; right: 0; opacity: 0;
+             font-size: 84px; white-space: nowrap; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em;
+             color: var(--text); text-shadow: 0 6px 24px rgba(0,0,0,.65); }
+      .cap .w { display: inline-block; margin: 0 .12em; }
+      .cap .key { color: var(--accent); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="14.90"
+         data-width="1080" data-height="1920">
+      <div id="stage">
+        <video id="take" class="clip" src="assets/take.mp4" data-start="0"
+               data-duration="14.90" data-track-index="0" data-has-audio="true" playsinline></video>
+      </div>
+      <div id="captions"></div>
+    </div>
+
+    <script>
+      // Gerado pelo scripts/new_edit.py a partir do <take>.words.json
+      const WORDS = [{"start": 0.0, "end": 0.38, "word": "Oi,"}, {"start": 0.54, "end": 0.74, "word": "eu"}, {"start": 0.74, "end": 1.1, "word": "sou"}, {"start": 1.1, "end": 1.26, "word": "o"}, {"start": 1.26, "end": 1.8, "word": "Marcus."}, {"start": 1.96, "end": 2.26, "word": "Hoje"}, {"start": 2.26, "end": 2.44, "word": "eu"}, {"start": 2.44, "end": 2.6, "word": "vou"}, {"start": 2.6, "end": 3.2, "word": "mostrar"}, {"start": 3.2, "end": 3.66, "word": "como"}, {"start": 3.66, "end": 4.28, "word": "Claude"}, {"start": 4.28, "end": 4.82, "word": "edita"}, {"start": 4.82, "end": 5.04, "word": "meus"}, {"start": 5.04, "end": 5.64, "word": "vídeos."}, {"start": 5.8, "end": 6.64, "word": "Primeiro,"}, {"start": 6.94, "end": 7.26, "word": "zoom"}, {"start": 7.26, "end": 7.56, "word": "na"}, {"start": 7.56, "end": 7.84, "word": "minha"}, {"start": 7.84, "end": 8.26, "word": "mão."}, {"start": 8.42, "end": 8.98, "word": "Agora,"}, {"start": 9.14, "end": 9.46, "word": "olha"}, {"start": 9.46, "end": 9.8, "word": "essa"}, {"start": 9.8, "end": 10.5, "word": "legenda"}, {"start": 10.5, "end": 11.36, "word": "aparecendo"}, {"start": 11.36, "end": 12.06, "word": "palavra"}, {"start": 12.06, "end": 12.4, "word": "por"}, {"start": 12.4, "end": 13.1, "word": "palavra."}, {"start": 13.26, "end": 13.5, "word": "Me"}, {"start": 13.5, "end": 13.98, "word": "segue"}, {"start": 13.98, "end": 14.36, "word": "para"}, {"start": 14.36, "end": 14.8, "word": "mais."}];
+
+      // ---- Ajustes da edição (o Claude edita aqui) ----
+      const WORDS_PER_CAPTION = 3;        // 2–3 palavras na tela por vez
+      const KEY_WORDS = ["Claude", "Marcus", "legenda"];               // palavras destacadas na cor --accent, ex.: ["Claude"]
+      const ZOOM_ON = ["zoom"];                 // punch-in 1.2x nessas palavras, ex.: ["zoom"]
+      const ZOOM_HOLD = 2;                // segundos segurando o zoom
+      // -------------------------------------------------
+
+      const norm = (s) => s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+      const tl = gsap.timeline({ paused: true });
+      const box = document.getElementById("captions");
+
+      // Agrupa até WORDS_PER_CAPTION palavras, sem atravessar o fim de uma frase
+      const groups = [[]];
+      WORDS.forEach((w) => {
+        const g = groups.at(-1);
+        g.push(w);
+        if (g.length >= WORDS_PER_CAPTION || /[.!?…]$/.test(w.word)) groups.push([]);
+      });
+      if (!groups.at(-1).length) groups.pop();
+
+      // Legendas palavra a palavra
+      groups.forEach((group, gi) => {
+        const next = groups[gi + 1]?.[0];
+        const start = group[0].start;
+        const end = next ? Math.min(next.start, group.at(-1).end + 0.6) : group.at(-1).end + 0.6;
+
+        const cap = document.createElement("div");
+        cap.className = "cap";
+        group.forEach((w) => {
+          const span = document.createElement("span");
+          span.className = "w" + (KEY_WORDS.some((k) => norm(k) === norm(w.word)) ? " key" : "");
+          span.textContent = w.word;
+          cap.appendChild(span);
+        });
+        box.appendChild(cap);
+
+        tl.fromTo(cap, { opacity: 0, y: 20, scale: 0.96 },
+                       { opacity: 1, y: 0, scale: 1, duration: 0.12, ease: "power2.out" }, start);
+        cap.querySelectorAll(".w").forEach((span, j) => {
+          tl.fromTo(span, { opacity: 0.35 }, { opacity: 1, duration: 0.05 }, group[j].start);
+        });
+        tl.to(cap, { opacity: 0, duration: 0.08 }, end - 0.08);
+      });
+
+      // Punch-in zooms sincronizados à palavra
+      let lastZoom = -Infinity;
+      WORDS.forEach((w) => {
+        if (!ZOOM_ON.some((z) => norm(z) === norm(w.word))) return;
+        if (w.start - lastZoom < 5) return; // no máximo um zoom a cada 5s
+        lastZoom = w.start;
+        tl.to("#stage", { scale: 1.2, duration: 0.18, ease: "power3.out" }, w.start)
+          .to("#stage", { scale: 1, duration: 0.5, ease: "power2.inOut" }, w.start + ZOOM_HOLD);
+      });
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

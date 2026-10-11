@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="pt-BR" data-resolution="portrait">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1920" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya:ital,wght@0,500;0,700;1,500&display=swap" />
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/MaskPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<style>
+:root{--papel:#f3e7cc;--tinta:#3b2a1a;--musgo:#4d6131;--mel:#c08a2e;--display:"IM Fell English SC",Georgia,serif;--corpo:"Alegreya",Georgia,serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#1d2a19}
+#root{position:relative;width:1080px;height:1920px;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#3a4a2c,#1d2a19 70%)}
+#gl{position:absolute;left:0;top:0;width:1080px;height:1920px}
+.pre{position:absolute;left:0;top:0;width:2px;height:2px;opacity:0}
+.hide{opacity:0;visibility:hidden}
+#grain{position:absolute;left:-256px;top:-256px;width:1592px;height:2432px;opacity:.18;background:url(assets/grain.png) repeat;pointer-events:none}
+#vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 50%,rgba(20,14,6,.65) 100%)}
+#flash{position:absolute;inset:0;background:#fff6dc;opacity:0;pointer-events:none}
+#fade{position:absolute;inset:0;background:#120c06;opacity:0;pointer-events:none}
+/* títulos: etiqueta de papel */
+.tag{position:absolute;left:50%;top:250px;transform:translateX(-50%);text-align:center;white-space:nowrap;
+  background:var(--papel);color:var(--tinta);padding:22px 56px 18px;border-radius:14px;border:3px solid #c9b282;
+  box-shadow:0 18px 40px rgba(0,0,0,.45),inset 0 0 0 6px #f3e7cc,inset 0 0 0 8px #d6c39b}
+.tag .k{display:block;font-family:var(--corpo);font-style:italic;font-weight:500;font-size:34px;color:var(--musgo);margin-bottom:2px}
+.tag .t{display:block;font-family:var(--display);font-size:84px;line-height:1}
+.chips{position:absolute;left:0;right:0;top:1250px;display:flex;justify-content:center;gap:18px}
+.chip{font-family:var(--display);font-size:52px;color:var(--papel);text-shadow:0 4px 18px rgba(0,0,0,.85),0 0 30px rgba(192,138,46,.6)}
+.chip.dot{color:var(--mel)}
+#cap{position:absolute;left:70px;right:110px;top:1400px;text-align:center;font-family:var(--corpo);font-weight:700;font-size:48px;line-height:1.2;color:#fff8e6;text-shadow:0 3px 14px rgba(0,0,0,.9),0 0 2px #000}
+.capl{position:absolute;left:0;right:0;opacity:0;visibility:hidden}
+#end{position:absolute;left:0;right:0;top:1290px;text-align:center}
+#end .a{font-family:var(--corpo);font-style:italic;font-size:40px;color:#e9d9b5;text-shadow:0 3px 12px #000}
+#end .b{font-family:var(--display);font-size:104px;line-height:1;color:var(--papel);margin-top:8px;text-shadow:0 6px 24px rgba(0,0,0,.9),0 0 40px rgba(192,138,46,.55)}
+#end .c{font-family:var(--corpo);font-size:34px;color:var(--mel);margin-top:18px;letter-spacing:.06em;text-shadow:0 3px 12px #000}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="__DURATION__" data-width="1080" data-height="1920">
+  <audio id="master" src="assets/master.wav" data-start="0" data-duration="__DURATION__" data-track-index="0"></audio>
+  <img class="pre" id="f1" src="assets/img/MAX_1de5_FRENTE.jpg" alt="" /><img class="pre" id="f2" src="assets/img/MAX_2de5_FRENTE.jpg" alt="" />
+  <img class="pre" id="f3" src="assets/img/MAX_3de5_FRENTE.jpg" alt="" /><img class="pre" id="f4" src="assets/img/MAX_4de5_FRENTE.jpg" alt="" />
+  <img class="pre" id="f5" src="assets/img/MAX_5de5_FRENTE.jpg" alt="" />
+  <img class="pre" id="v1" src="assets/img/MAX_1de5_VERSO.jpg" alt="" /><img class="pre" id="v2" src="assets/img/MAX_2de5_VERSO.jpg" alt="" />
+  <img class="pre" id="v4" src="assets/img/MAX_4de5_VERSO.jpg" alt="" /><img class="pre" id="v5" src="assets/img/MAX_5de5_VERSO.jpg" alt="" />
+  <img class="pre" id="c1" src="assets/img/max1_cut.png" alt="" /><img class="pre" id="c2" src="assets/img/max2_cut.png" alt="" />
+  <img class="pre" id="c4" src="assets/img/max4_cut.png" alt="" /><img class="pre" id="c5" src="assets/img/max5_cut.png" alt="" />
+  <img class="pre" id="b1" src="assets/img/bg1.jpg" alt="" /><img class="pre" id="b2" src="assets/img/bg2.jpg" alt="" />
+  <img class="pre" id="b4" src="assets/img/bg4.jpg" alt="" /><img class="pre" id="b5" src="assets/img/bg5.jpg" alt="" />
+
+  <div id="world">
+    <canvas id="gl" width="1080" height="1920"></canvas>
+    <div class="tag hide" id="t1"><span class="k">o que mora no coração</span><span class="t">Macacão Max</span></div>
+    <div class="tag hide" id="t2"><span class="k">quando fica difícil</span><span class="t">Frustração</span></div>
+    <div class="tag hide" id="t3"><span class="k">pequeno passo</span><span class="t">Um passo de cada vez</span></div>
+    <div class="tag hide" id="t4"><span class="k">semente de história</span><span class="t">A pedra azul</span></div>
+    <div class="chips" id="ch1"><span class="chip hide">explorar</span><span class="chip dot hide">·</span><span class="chip hide">brincar</span><span class="chip dot hide">·</span><span class="chip hide">descobrir</span></div>
+    <div id="cap"></div>
+    <div id="end">
+      <div class="a hide" id="e1">Baralho da</div>
+      <div class="b hide" id="e2">Floresta Encantada</div>
+      <div class="c hide" id="e3">MACACÃO MAX · 5 CARTAS</div>
+    </div>
+  </div>
+  <div id="grain"></div>
+  <div id="vig"></div>
+  <div id="flash"></div>
+  <div id="fade"></div>
+</div>
+
+<script>
+const TIMING = /*TIMING*/null;
+const CUES = /*CUES*/null;
+const CUT = /*CUTMETA*/null;
+const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
+const SEG = Object.fromEntries(TIMING.segments.map((s) => [s.id, s]));
+const S = (id) => SEG[id].start;
+function W(id, p, nth = 0) { const q = norm(p); const h = SEG[id].words.filter((w) => norm(w.word).startsWith(q)); if (!h.length) throw new Error(p); return h[Math.min(nth, h.length - 1)].start; }
+const END = TIMING.total;
+
+// ============================== 3D ==============================
+const GL = (() => {
+  const WD = 1080, HT = 1920;
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const prog = (t, a, d) => clamp((t - a) / d);
+  const eo3 = (x) => 1 - Math.pow(1 - x, 3), ei3 = (x) => x * x * x, eio = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  const back = (x, s = 1.7) => 1 + (s + 1) * Math.pow(x - 1, 3) + s * Math.pow(x - 1, 2);
+  const lerp = (a, b, x) => a + (b - a) * x;
+  let seed = 11; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+  let R, comp, rp, scene, cam, ready = false;
+  const canv = [];
+  function ctex(w, h, draw, img) {
+    const c = document.createElement("canvas"); c.width = w; c.height = h;
+    const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 8;
+    const e = { c, tex, draw, img, ok: false }; canv.push(e); paint(e); return tex;
+  }
+  function paint(e) { const x = e.c.getContext("2d"); x.clearRect(0, 0, e.c.width, e.c.height); e.draw(x, e.c.width, e.c.height); e.tex.needsUpdate = true; e.ok = !e.img || (e.img.complete && e.img.naturalWidth > 0); }
+  const imgTex = (id) => { const img = document.getElementById(id); return ctex(img.naturalWidth || 480, img.naturalHeight || 720, (x, w, h) => { if (img.complete && img.naturalWidth) x.drawImage(img, 0, 0, w, h); }, img); };
+  let roundMask;
+  function cardMesh(front, backId) {
+    if (!roundMask) roundMask = ctex(240, 360, (x, w, h) => { x.fillStyle = "#000"; x.fillRect(0, 0, w, h); x.fillStyle = "#fff"; const r = 16; x.beginPath(); x.moveTo(r, 0); x.arcTo(w, 0, w, h, r); x.arcTo(w, h, 0, h, r); x.arcTo(0, h, 0, 0, r); x.arcTo(0, 0, w, 0, r); x.fill(); });
+    const g = new THREE.Group();
+    const mk = (id, rotY) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(2, 3), new THREE.MeshBasicMaterial({ map: imgTex(id), alphaMap: roundMask, transparent: true, toneMapped: false, side: THREE.FrontSide })); m.rotation.y = rotY; return m; };
+    const f = mk(front, 0); f.position.z = 0.006; g.add(f);
+    if (backId) { const b = mk(backId, Math.PI); b.position.z = -0.006; g.add(b); }
+    const edge = new THREE.Mesh(new THREE.PlaneGeometry(2.02, 3.02), new THREE.MeshBasicMaterial({ color: 0x9c8a63, alphaMap: roundMask, transparent: true, side: THREE.DoubleSide, toneMapped: false })); g.add(edge);
+    g.userData.front = f;
+    return g;
+  }
+  const glowTex = () => ctex(128, 128, (x) => { const g = x.createRadialGradient(64, 64, 0, 64, 64, 64); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(0.25, "rgba(255,240,200,.75)"); g.addColorStop(1, "rgba(255,200,120,0)"); x.fillStyle = g; x.fillRect(0, 0, 128, 128); });
+  let dot;
+  function motes(n, box, color, size) {
+    dot = dot || glowTex();
+    const base = []; for (let i = 0; i < n; i++) base.push([lerp(box[0], box[1], rnd()), lerp(box[2], box[3], rnd()), lerp(box[4], box[5], rnd()), 0.15 + rnd() * 0.5, rnd() * 6.28]);
+    const pos = new Float32Array(n * 3); const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    const p = new THREE.Points(g, new THREE.PointsMaterial({ color, size, map: dot, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    const span = box[3] - box[2];
+    p.userData.up = (t, rise = 0.6) => { for (let i = 0; i < n; i++) { const b = base[i]; pos[i * 3] = b[0] + Math.sin(t * b[3] * 2 + b[4]) * 0.35; pos[i * 3 + 1] = box[2] + ((b[1] - box[2] + t * b[3] * rise) % span); pos[i * 3 + 2] = b[2] + Math.cos(t * b[3] + b[4]) * 0.25; } g.attributes.position.needsUpdate = true; };
+    return p;
+  }
+  // diorama: fundo desfocado + Max recortado + chão de luz
+  function diorama(n) {
+    const g = new THREE.Group();
+    const bg = new THREE.Mesh(new THREE.PlaneGeometry(9, 14.1), new THREE.MeshBasicMaterial({ map: imgTex("b" + n), transparent: true, toneMapped: false }));
+    bg.position.z = -5; g.add(bg);
+    const img = document.getElementById("c" + n);
+    const ar = (img.naturalHeight || 840) / (img.naturalWidth || 640);
+    const hgt = 2.7;
+    const max = new THREE.Mesh(new THREE.PlaneGeometry(hgt / ar, hgt), new THREE.MeshBasicMaterial({ map: imgTex("c" + n), transparent: true, alphaTest: 0.02, toneMapped: false }));
+    max.position.set(0, -0.05, 0.6); g.add(max);
+    const shadow = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 0.9), new THREE.MeshBasicMaterial({ map: ctex(128, 64, (x) => { const r = x.createRadialGradient(64, 32, 0, 64, 32, 64); r.addColorStop(0, "rgba(0,0,0,.6)"); r.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = r; x.fillRect(0, 0, 128, 64); }), transparent: true, depthWrite: false }));
+    shadow.rotation.x = -Math.PI / 2; shadow.position.set(0, -1.4, 0.6); g.add(shadow);
+    g.userData = { bg, max, shadow, h: hgt, w: hgt / ar };
+    return g;
+  }
+  function leafTex(hue) { return ctex(64, 96, (x) => { x.translate(32, 48); x.fillStyle = hue; x.beginPath(); x.moveTo(0, -44); x.quadraticCurveTo(30, -10, 0, 44); x.quadraticCurveTo(-30, -10, 0, -44); x.fill(); x.strokeStyle = "rgba(60,40,10,.5)"; x.lineWidth = 2; x.beginPath(); x.moveTo(0, -40); x.lineTo(0, 42); x.stroke(); }); }
+  function ring(r, w, color) { return new THREE.Mesh(new THREE.RingGeometry(r - w, r, 96), new THREE.MeshBasicMaterial({ color, transparent: true, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false })); }
+
+  const P = {};
+  function init() {
+    R = new THREE.WebGLRenderer({ canvas: document.getElementById("gl"), antialias: true, preserveDrawingBuffer: true });
+    R.setPixelRatio(1); R.setSize(WD, HT, false); R.outputEncoding = THREE.sRGBEncoding; R.toneMapping = THREE.ACESFilmicToneMapping; R.toneMappingExposure = 1.05;
+    R.setClearColor(0x1d2a19, 1);
+    scene = new THREE.Scene(); scene.fog = new THREE.Fog(0x1d2a19, 14, 30);
+    cam = new THREE.PerspectiveCamera(40, WD / HT, 0.1, 100);
+    scene.add(new THREE.HemisphereLight(0xfff1d6, 0x2a3a20, 1.15));
+    const key = new THREE.DirectionalLight(0xffe6b8, 0.9); key.position.set(-3, 5, 8); scene.add(key);
+    P.warm = new THREE.PointLight(0xffc070, 8, 12); P.warm.position.set(2, 2, 3); scene.add(P.warm);
+    P.blue = new THREE.PointLight(0x66b8ff, 0, 7); scene.add(P.blue);
+    // fundo geral (floresta da carta 1, bem desfocada) para os momentos de carta
+    P.backdrop = new THREE.Mesh(new THREE.PlaneGeometry(16, 26), new THREE.MeshBasicMaterial({ map: imgTex("b1"), color: 0x8a8a70, toneMapped: false }));
+    P.backdrop.position.z = -9; scene.add(P.backdrop);
+    P.cards = { 1: cardMesh("f1", "v1"), 2: cardMesh("f2", "v2"), 4: cardMesh("f4", "v4"), 5: cardMesh("f5", "v5") };
+    Object.values(P.cards).forEach((c) => scene.add(c));
+    P.dio = { 1: diorama(1), 2: diorama(2), 4: diorama(4), 5: diorama(5) };
+    Object.values(P.dio).forEach((d) => scene.add(d));
+    P.fan = [1, 2, 3, 4, 5].map((n) => { const c = cardMesh("f" + n, null); scene.add(c); return c; });
+    P.motes = motes(140, [-5, 5, -6, 7, -4, 3], 0xffd890, 0.16); scene.add(P.motes);
+    P.blueMotes = motes(70, [-0.6, 0.6, -0.6, 3.5, 0.3, 1.2], 0x88ccff, 0.13); scene.add(P.blueMotes);
+    P.leaves = []; const hues = ["#7d8f3c", "#a8742c", "#c08a2e", "#5f7a30", "#b5652a"];
+    for (let i = 0; i < 16; i++) { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.32, 0.48), new THREE.MeshStandardMaterial({ map: leafTex(hues[i % 5]), transparent: true, side: THREE.DoubleSide, roughness: 0.8 })); m.userData = { x: lerp(-3.4, 3.4, rnd()), z: lerp(-1.5, 2.6, rnd()), sp: 0.5 + rnd() * 0.6, ph: rnd() * 6.28, off: rnd() * 8 }; scene.add(m); P.leaves.push(m); }
+    P.rings = [0, 1, 2].map(() => { const r = ring(1.3, 0.05, 0xffd890); r.position.set(0, 0.35, 0.2); scene.add(r); return r; });
+    P.stones = [0, 1, 2].map((k) => { const s = new THREE.Mesh(new THREE.CylinderGeometry(0.3 - k * 0.02, 0.34 - k * 0.02, 0.09, 24), new THREE.MeshBasicMaterial({ color: 0x23281a, toneMapped: false })); s.scale.z = 0.6; scene.add(s); return s; });
+    P.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: 0x6fc2ff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); scene.add(P.glow);
+    comp = new THREE.EffectComposer(R); rp = new THREE.RenderPass(scene, cam); comp.addPass(rp);
+    comp.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(WD / 2, HT / 2), 0.5, 0.45, 0.96));
+    ready = true;
+  }
+
+  // posição de entrada/saída de uma carta: chega girando, fica, e a câmera "atravessa" a carta
+  function cardShot(card, t, a, from) {
+    const enter = eo3(prog(t, a, 1.0));
+    const p = from;
+    card.visible = t >= a - 0.01;
+    card.position.set(lerp(p.x, 0, enter), lerp(p.y, 0.15, enter), lerp(p.z, 0, enter));
+    card.rotation.set(lerp(p.rx, -0.05, enter), lerp(p.ry, 0, enter) + Math.sin(t * 1.3) * 0.06 * enter, lerp(p.rz, 0, enter));
+    return enter;
+  }
+  function render(t) {
+    if (!ready) { if (document.readyState !== "complete") return; init(); }
+    for (const e of canv) if (!e.ok) paint(e);
+    const s2 = S("s2") - 0.35, s3 = S("s3") - 0.35, s4 = S("s4") - 0.35;
+    const fanAt = W("s4", "aventura") - 0.15;
+    // janelas: carta (entra + atravessa) → diorama
+    const shots = [
+      { n: 1, a: 0.0, through: W("s1", "Macac") + 0.55, end: s2, from: { x: 0, y: -6, z: -6, rx: 0.8, ry: Math.PI * 3, rz: 0.4 } },
+      { n: 2, a: s2, through: W("s2", "queria") + 0.15, end: s3, from: { x: 6, y: 1, z: -4, rx: 0, ry: -Math.PI * 2.5, rz: -0.3 } },
+      { n: 4, a: s3, through: s3 + 0.7, end: s4, from: { x: -6, y: 2, z: -5, rx: -0.4, ry: Math.PI * 2.5, rz: 0.3 } },
+      { n: 5, a: s4, through: s4 + 1.0, end: fanAt + 0.1, from: { x: 0, y: 7, z: -6, rx: -1, ry: -Math.PI * 3, rz: 0 } },
+    ];
+    let camZ = 8.6, camX = 0, camY = 0.15, lookY = 0.1, dioAlpha = 0;
+    P.blue.intensity = 0; P.glow.visible = false; P.blueMotes.visible = false;
+    P.leaves.forEach((l) => (l.visible = false)); P.rings.forEach((r) => (r.visible = false)); P.stones.forEach((s) => (s.visible = false));
+    P.fan.forEach((c) => (c.visible = false));
+    for (const sh of shots) {
+      const card = P.cards[sh.n], dio = P.dio[sh.n];
+      const active = t >= sh.a - 0.01 && t < sh.end;
+      card.visible = false; dio.visible = false;
+      if (!active) continue;
+      cardShot(card, t, sh.a, sh.from);
+      // atravessar: a carta vem para a câmera e some, o diorama surge atrás
+      const th = eio(prog(t, sh.through, 0.55));
+      card.position.z += th * 8.2; card.scale.setScalar(1 + th * 0.3);
+      card.visible = th < 0.98;
+      const lt = t - sh.through;
+      dio.visible = th > 0.02;
+      dioAlpha = th;
+      const u = dio.userData;
+      u.bg.material.opacity = th; u.max.material.opacity = th; u.shadow.material.opacity = th;
+      // parallax: câmera deriva, Max respira
+      camX = Math.sin(lt * 0.5) * 0.55; camY = 0.15 + Math.sin(lt * 0.35) * 0.12; camZ = lerp(8.6, 7.6, eo3(prog(lt, 0, sh.end - sh.through)));
+      u.max.position.y = -0.05 + Math.sin(lt * 2.2) * 0.04 + (1 - eo3(prog(lt, 0, 0.6))) * -0.8;
+      u.max.scale.setScalar(lerp(0.85, 1, eo3(prog(lt, 0, 0.7))));
+      u.max.rotation.y = Math.sin(lt * 0.6) * 0.08;
+      // efeitos de cada cena
+      if (sh.n === 2) {
+        P.leaves.forEach((l, i) => { const d = l.userData; const y = 6.5 - ((t * d.sp + d.off) % 9.5); l.visible = th > 0.1; l.position.set(d.x + Math.sin(t * 1.4 + d.ph) * 0.5, y, d.z); l.rotation.set(Math.sin(t * 2 + d.ph) * 0.9, t * 1.2 + d.ph, Math.cos(t * 1.7 + d.ph) * 0.6); });
+      }
+      if (sh.n === 4) {
+        const r0 = W("s3", "respira");
+        P.rings.forEach((r, k) => { const p = prog(t, r0 + k * 0.42, 1.3); r.visible = p > 0 && p < 1; r.scale.setScalar(0.35 + eo3(p) * 0.75); r.material.opacity = (1 - p) * 0.75; });
+        const stepAt = [W("s3", "passo"), W("s3", "de"), W("s3", "cada")];
+        P.stones.forEach((s, k) => { const p = back(prog(t, stepAt[k] - 0.15, 0.4)); s.visible = p > 0; s.scale.set(p, p, p * 0.6); s.position.set(-0.55 + k * 0.55, -1.42, 0.95 + k * 0.42); });
+        let hop = 0; stepAt.forEach((a) => { const p = prog(t, a, 0.3); if (p > 0 && p < 1) hop = Math.max(hop, Math.sin(p * Math.PI)); });
+        u.max.position.y += hop * 0.22;
+      }
+      if (sh.n === 5) {
+        const pa = W("s4", "pedra");
+        const gb = eo3(prog(t, pa - 0.1, 0.6));
+        // a pedra azul está nas mãos do Max (≈ 78% da largura, 43% da altura do recorte)
+        const gx = u.max.position.x + (0.78 - 0.5) * u.w, gy = u.max.position.y + (0.5 - 0.43) * u.h;
+        P.glow.visible = gb > 0; P.glow.position.set(gx, gy, 0.75); P.glow.scale.setScalar(0.25 + gb * 0.75 + Math.sin(t * 6) * 0.05); P.glow.material.opacity = gb;
+        P.blue.position.set(gx, gy, 1.4); P.blue.intensity = gb * 6;
+        P.blueMotes.visible = gb > 0; P.blueMotes.position.set(gx, gy - 0.6, 0); P.blueMotes.material.opacity = gb; P.blueMotes.userData.up(t, 1.4);
+      }
+    }
+    // leque final das 5 cartas
+    const fp = prog(t, fanAt, 1.2);
+    if (fp > 0) {
+      P.fan.forEach((c, i) => {
+        const p = eo3(prog(t, fanAt + i * 0.09, 1.0));
+        const ang = (i - 2) * 0.27;
+        c.visible = true;
+        c.position.set(lerp(0, Math.sin(ang) * 2.7, p), lerp(-8, 1.1 + Math.cos(ang) * 0.9 - 0.9, p) + Math.sin(t * 1.1 + i) * 0.04, lerp(-2, -0.4 - Math.abs(i - 2) * 0.3, p));
+        c.rotation.set(-0.08, -ang * 0.55, -ang * p);
+        c.scale.setScalar(0.64);
+      });
+      camZ = lerp(camZ, 10.2, eo3(fp)); camX = lerp(camX, 0, eo3(fp)); camY = lerp(camY, -0.6, eo3(fp)); lookY = lerp(lookY, -0.2, eo3(fp));
+      P.dio[5].visible = prog(t, fanAt, 0.5) < 1; P.dio[5].userData.bg.material.opacity *= 1 - prog(t, fanAt, 0.5); P.dio[5].userData.max.material.opacity *= 1 - prog(t, fanAt, 0.5);
+    }
+    P.backdrop.material.opacity = 1;
+    P.backdrop.material.color.setScalar(lerp(0.45, 0.3, dioAlpha));
+    P.motes.userData.up(t);
+    P.warm.intensity = 8 + Math.sin(t * 2) * 1.5;
+    cam.position.set(camX, camY, camZ);
+    cam.lookAt(0, lookY, 0);
+    comp.render();
+  }
+  return { render };
+})();
+</script>
+<script>
+const $ = (s) => document.querySelector(s), $$ = (s) => Array.from(document.querySelectorAll(s));
+const tl = gsap.timeline({ paused: true });
+const clock = { t: 0 };
+tl.to(clock, { t: END, duration: END, ease: "none", onUpdate() { GL.render(clock.t); } }, 0);
+tl.to("#grain", { x: 256 * 2, y: 256 * 3, duration: END, ease: `steps(${Math.round(END * 12)})` }, 0);
+tl.fromTo("#fade", { opacity: 1 }, { opacity: 0, duration: 0.7 }, 0);
+tl.to("#fade", { opacity: 1, duration: 0.6, ease: "power2.in" }, END - 0.6);
+const tagIn = (el, at, out) => {
+  tl.fromTo(el, { autoAlpha: 0, y: -40, rotationX: -70, transformPerspective: 1000, transformOrigin: "50% 0%" }, { autoAlpha: 1, y: 0, rotationX: 0, duration: 0.6, ease: "back.out(1.6)" }, at);
+  tl.to(el, { autoAlpha: 0, y: -30, duration: 0.3, ease: "power2.in" }, out - 0.3);
+};
+const s2 = S("s2") - 0.35, s3 = S("s3") - 0.35, s4 = S("s4") - 0.35, fanAt = W("s4", "aventura") - 0.15;
+tagIn("#t1", W("s1", "Macac") - 0.1, s2);
+tagIn("#t2", W("s2", "queria") + 0.3, s3);
+tagIn("#t3", W("s3", "passo") - 0.2, s4);
+tagIn("#t4", W("s4", "pedra") - 0.1, fanAt + 0.1);
+// palavras do Max
+const chips = $$("#ch1 .chip");
+[["explorar", 0], ["brincar", 2], ["descobrir", 4]].forEach(([w, i]) => {
+  const at = W("s1", w) - 0.05;
+  tl.fromTo(chips[i], { autoAlpha: 0, y: 30, scale: 0.7 }, { autoAlpha: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(2)" }, at);
+  if (i) tl.fromTo(chips[i - 1], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2 }, at - 0.1);
+});
+tl.to("#ch1", { autoAlpha: 0, duration: 0.3 }, s2 - 0.3);
+// legendas (frase a frase)
+const cap = $("#cap");
+TIMING.segments.forEach((seg) => {
+  const tw = seg.text.split(/\s+/), ww = seg.words, ph = []; let cur = [];
+  tw.forEach((w, i) => { cur.push([w, i]); if ((/[.,?!]$/.test(w) && cur.length >= 3) || cur.length >= 7) { ph.push(cur); cur = []; } });
+  if (cur.length) ph.push(cur);
+  const map = (i) => ww[Math.min(ww.length - 1, Math.round((i * (ww.length - 1)) / Math.max(1, tw.length - 1)))];
+  ph.forEach((p, k) => {
+    const el = document.createElement("div"); el.className = "capl"; el.textContent = p.map((x) => x[0]).join(" "); cap.appendChild(el);
+    const a = map(p[0][1]).start - 0.05, nx = ph[k + 1], b = nx ? map(nx[0][1]).start - 0.05 : map(p.at(-1)[1]).end + 0.3;
+    tl.fromTo(el, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.15 }, a);
+    tl.to(el, { autoAlpha: 0, duration: 0.12 }, Math.max(a + 0.3, b - 0.12));
+  });
+});
+// passagem pela carta: lampejo quente
+[W("s1", "Macac") + 0.55, W("s2", "queria") + 0.15, s3 + 0.7, s4 + 1.0].forEach((t) => tl.fromTo("#flash", { opacity: 0.35 }, { opacity: 0, duration: 0.5, immediateRender: false }, t + 0.35));
+// final
+tl.fromTo("#e1", { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 0.5 }, fanAt + 0.9);
+tl.fromTo("#e2", { autoAlpha: 0, scale: 1.25, filter: "blur(10px)" }, { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 0.7, ease: "power3.out" }, fanAt + 1.05);
+tl.fromTo("#e3", { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.5 }, fanAt + 1.5);
+window.__timelines = window.__timelines || {};
+window.__timelines["main"] = tl;
+tl.seek(0);
+</script>
+</body>
+</html>
